@@ -6,14 +6,16 @@ Sitio web del programa **Cognición en Movimiento (COGNI-move)**, Universidad An
 
 ```
 ├── src/
-│   ├── index.html        # Fuente del sitio (un solo archivo, con imágenes y descargables embebidos)
+│   ├── index.html        # Fuente del sitio (un solo archivo, con imágenes embebidas)
 │   ├── favicon.svg       # Ícono fuente; el build genera .ico, PNG y manifest
 │   └── admin/            # Panel interno /admin (registro de descargas, tablas y Excel)
 ├── api/
 │   ├── contacto.js       # Formulario de contacto → correo (Resend)
-│   ├── registro.js       # Registro de aceptación de licencia y descargas (Upstash Redis)
+│   ├── descarga.js       # Única vía de descarga: valida licencia + correo, registra y entrega el archivo
+│   ├── registro.js       # Eventos complementarios de la licencia (copia guardada)
 │   ├── admin/            # login, logout y datos del panel
 │   └── _lib/             # catálogo de recursos, validación, sesión, rate limit
+├── recursos/             # Archivos descargables (no se publican; solo los entrega /api/descarga)
 ├── scripts/
 │   ├── build.mjs         # src/ → public/ (optimiza imágenes, separa JS, genera favicons)
 │   ├── dev.mjs           # Servidor local que imita Vercel
@@ -32,8 +34,12 @@ como archivo único con imágenes en base64: el build las extrae, deduplica y op
 Reglas para que el build no falle:
 
 - Sin manejadores inline (`onclick="..."`): usar `data-*` y `addEventListener`. La CSP no permite JS inline.
-- Si se agrega o renombra un recurso descargable, actualizarlo también en `api/_lib/catalogo.js`
-  (el build valida que coincidan). Lo mismo para opciones nuevas de motivo o país del formulario.
+- Todo material descargable pasa por la ventana de licencia: botón con `data-licencia` y `data-recurso`, archivo
+  en `recursos/` y entrada en `RECURSOS` de `api/_lib/catalogo.js`. El build se detiene si encuentra un enlace
+  directo a un archivo (PDF, Word, Excel, etc.) o un recurso sin archivo. Si una versión offline trae el archivo
+  embebido (`<div hidden><a id="…" href="data:…">`), el build local actualiza `recursos/`: hay que incluirlo en el commit.
+- Si cambia el texto de la licencia, subir la versión en `VERSIONES_LICENCIA` (catálogo) y en `VERSION` de `src/index.html`.
+- Opciones nuevas de motivo o país del formulario también van en el catálogo (el build valida que coincidan).
 
 ## Build y pruebas locales
 
@@ -78,14 +84,15 @@ Vercel → Project → Settings → Environment Variables (Production).
 | `ADMIN_PASS_HASH` | Hash scrypt de la contraseña (`npm run hash-password`). Nunca la contraseña en claro. |
 | `SESSION_SECRET` | Secreto aleatorio (≥ 32 caracteres) para firmar la sesión y anonimizar IPs del rate limit. |
 
-Sin estas variables el sitio sigue funcionando: el formulario responde que el envío no está disponible,
-el registro de descargas no guarda nada y `/admin` permanece cerrado.
+Sin estas variables el sitio sigue cargando, pero el formulario responde que el envío no está disponible,
+las descargas no se entregan (no se pueden registrar) y `/admin` permanece cerrado.
 
 Cambiar la contraseña del panel: `npm run hash-password`, reemplazar `ADMIN_PASS_HASH` en Vercel y
 redeploy. Cambiar `SESSION_SECRET` cierra todas las sesiones abiertas.
 
 ## Qué se registra
 
-Cada descarga con licencia aceptada (y cada copia guardada de la licencia) guarda: fecha y hora del
-servidor, tipo de evento, recurso, versión de licencia, sección de origen y un identificador técnico
-de sesión aleatorio. No se guardan nombres, correos ni IP.
+Cada descarga guarda: fecha y hora del servidor, recurso, versión de licencia aceptada, correo electrónico
+de quien descarga, sección de origen y un identificador técnico de sesión aleatorio. Si el registro no está
+disponible, el archivo no se entrega. Las copias guardadas de la licencia se registran sin correo. No se
+guardan nombres ni IP. Los registros anteriores a la versión 1.1 de la licencia no tienen correo.

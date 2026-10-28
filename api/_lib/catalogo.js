@@ -1,16 +1,25 @@
 // Catálogo único del sitio. Lo usan las funciones (listas permitidas) y scripts/build.mjs,
 // que falla si el HTML menciona un recurso, motivo o país que no esté aquí.
 
+// Los archivos viven en recursos/ (fuera de public/): solo /api/descarga los entrega,
+// después de validar la aceptación de la licencia y registrar la descarga.
 export const RECURSOS = [
   {
     id: 'plantilla-ficha-aula',
     nombre: 'Plantilla de ficha de actividad en aula',
     formato: 'Word (.docx)',
     etapas: ['Primera infancia', 'Etapa escolar'],
+    archivo: 'plantilla-ficha-aula.docx',
+    descarga: 'Plantilla_ficha_de_actividad_Cognicion_en_Movimiento.docx',
+    mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    // id del <a> oculto con el archivo embebido en src/index.html, si se vuelve a pegar una versión offline
+    ancla: 'archivo-plantilla-ficha',
   },
 ];
 
-export const VERSIONES_LICENCIA = ['1.0'];
+// Versión vigente al final; las anteriores se mantienen para leer el registro histórico.
+export const VERSIONES_LICENCIA = ['1.0', '1.1'];
+export const VERSION_VIGENTE = VERSIONES_LICENCIA.at(-1);
 
 export const EVENTOS = {
   descarga: 'Descarga con licencia aceptada',

@@ -110,6 +110,7 @@ th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--lin
 th { position: sticky; top: 0; background: var(--surface); color: var(--ink-2); font-weight: 600; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 td.sesion { font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: var(--muted); }
+td.correo { overflow-wrap: anywhere; }
 .paginacion { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 
 @media (max-width: 640px) {

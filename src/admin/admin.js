@@ -163,6 +163,7 @@
         descargas: perDesc.length,
         historico: hist.length,
         sesiones: new Set(perDesc.map(function (e) { return e.s; })).size,
+        correos: new Set(perDesc.filter(function (e) { return e.m; }).map(function (e) { return e.m; })).size,
         copias: per.filter(function (e) { return e.e === 'copia_licencia'; }).length,
         ultima: ultima,
         versiones: Array.from(new Set(perDesc.map(function (e) { return e.v; }))).sort().join(', ') || '—',
@@ -175,6 +176,7 @@
         descargas: descargas.length,
         historico: eventos.filter(function (e) { return e.e === 'descarga' && (!recurso || e.r === recurso); }).length,
         sesiones: new Set(descargas.map(function (e) { return e.s; })).size,
+        correos: new Set(descargas.filter(function (e) { return e.m; }).map(function (e) { return e.m; })).size,
         copias: enRango.filter(function (e) { return e.e === 'copia_licencia'; }).length,
         recursos: new Set(descargas.map(function (e) { return e.r; })).size,
         totalRecursos: porRecurso.length,
@@ -188,7 +190,8 @@
     var k = calc.kpi;
     $('k-descargas').textContent = fmt.format(k.descargas);
     $('k-descargas-nota').textContent = 'Total histórico: ' + fmt.format(k.historico);
-    $('k-sesiones').textContent = fmt.format(k.sesiones);
+    $('k-correos').textContent = fmt.format(k.correos);
+    $('k-correos-nota').textContent = 'Correos únicos · ' + fmt.format(k.sesiones) + ' sesiones únicas';
     $('k-copias').textContent = fmt.format(k.copias);
     $('k-recursos').textContent = fmt.format(k.recursos);
     $('k-recursos-nota').textContent = 'de ' + fmt.format(k.totalRecursos) + ' disponible' + (k.totalRecursos === 1 ? '' : 's');
@@ -324,8 +327,8 @@
       var h = document.createElement('h3'); h.textContent = p.recurso.nombre; art.appendChild(h);
       var chip = document.createElement('span'); chip.className = 'chip'; chip.textContent = p.recurso.formato + ' · ' + p.recurso.etapas.join(', '); art.appendChild(chip);
       var dl = document.createElement('dl');
-      [['Descargas en el período', fmt.format(p.descargas)], ['Total histórico', fmt.format(p.historico)], ['Sesiones únicas', fmt.format(p.sesiones)],
-        ['Copias de la licencia', fmt.format(p.copias)], ['Versión de licencia', p.versiones], ['Última descarga', p.ultima ? fechaHora(p.ultima) : '—']]
+      [['Descargas en el período', fmt.format(p.descargas)], ['Total histórico', fmt.format(p.historico)], ['Correos únicos', fmt.format(p.correos)],
+        ['Sesiones únicas', fmt.format(p.sesiones)],         ['Copias de la licencia', fmt.format(p.copias)], ['Versión de licencia', p.versiones], ['Última descarga', p.ultima ? fechaHora(p.ultima) : '—']]
         .forEach(function (x) {
           var dt = document.createElement('dt'); dt.textContent = x[0];
           var dd = document.createElement('dd'); dd.textContent = x[1];
@@ -351,10 +354,23 @@
 
   function nombreRecurso(id) { var r = datos.recursos.find(function (x) { return x.id === id; }); return r ? r.nombre : id; }
   function eventosOrdenados() { return calc.enRango.slice().sort(function (a, b) { return a.t < b.t ? 1 : -1; }); }
+  function porCorreo() {
+    var m = new Map();
+    calc.enRango.forEach(function (e) {
+      if (e.e !== 'descarga' || !e.m) return;
+      var x = m.get(e.m) || { correo: e.m, n: 0, primera: e.t, ultima: e.t, recursos: new Set() };
+      x.n++;
+      if (e.t < x.primera) x.primera = e.t;
+      if (e.t > x.ultima) x.ultima = e.t;
+      x.recursos.add(nombreRecurso(e.r));
+      m.set(e.m, x);
+    });
+    return Array.from(m.values()).sort(function (a, b) { return b.n - a.n || (a.correo < b.correo ? -1 : 1); });
+  }
 
   function renderTablas() {
-    tabla('t-recursos', [{ titulo: 'Recurso' }, { titulo: 'Formato' }, { titulo: 'Descargas (período)', num: 1 }, { titulo: 'Total histórico', num: 1 }, { titulo: 'Sesiones únicas', num: 1 }, { titulo: 'Copias de licencia', num: 1 }, { titulo: 'Versión de licencia' }, { titulo: 'Última descarga' }],
-      calc.porRecurso.map(function (p) { return [p.recurso.nombre, p.recurso.formato, fmt.format(p.descargas), fmt.format(p.historico), fmt.format(p.sesiones), fmt.format(p.copias), p.versiones, p.ultima ? fechaHora(p.ultima) : '—']; }));
+    tabla('t-recursos', [{ titulo: 'Recurso' }, { titulo: 'Formato' }, { titulo: 'Descargas (período)', num: 1 }, { titulo: 'Total histórico', num: 1 }, { titulo: 'Correos únicos', num: 1 }, { titulo: 'Sesiones únicas', num: 1 }, { titulo: 'Copias de licencia', num: 1 }, { titulo: 'Versión de licencia' }, { titulo: 'Última descarga' }],
+      calc.porRecurso.map(function (p) { return [p.recurso.nombre, p.recurso.formato, fmt.format(p.descargas), fmt.format(p.historico), fmt.format(p.correos), fmt.format(p.sesiones), fmt.format(p.copias), p.versiones, p.ultima ? fechaHora(p.ultima) : '—']; }));
     tabla('t-dias', [{ titulo: calc.semanal ? 'Semana desde' : 'Día' }, { titulo: 'Descargas', num: 1 }],
       calc.cubetas.slice().reverse().map(function (c) { return [diaLargo(c.dia), fmt.format(c.n)]; }));
     var totalOrigen = calc.porOrigen.reduce(function (s, f) { return s + f.n; }, 0);
@@ -363,9 +379,9 @@
 
     var evs = eventosOrdenados(), paginas = Math.max(1, Math.ceil(evs.length / POR_PAGINA));
     pagina = Math.min(pagina, paginas - 1);
-    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Versión' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
+    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Correo', clase: 'correo' }, { titulo: 'Versión' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
       evs.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA).map(function (e) {
-        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.v, datos.origenes[e.o] || e.o, e.s];
+        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.m || '—', e.v, datos.origenes[e.o] || e.o, e.s];
       }));
     $('t-eventos-nota').textContent = fmt.format(evs.length) + ' registros · ' + textoFiltros(calc.rango);
     $('pag-info').textContent = 'Página ' + (pagina + 1) + ' de ' + paginas;
@@ -385,19 +401,22 @@
         ['Recurso', recSel.options[recSel.selectedIndex].text],
         ['Descargas con licencia aceptada (período)', String(k.descargas)],
         ['Descargas totales (histórico)', String(k.historico)],
+        ['Correos únicos (período)', String(k.correos)],
         ['Sesiones únicas (período)', String(k.sesiones)],
         ['Copias de la licencia guardadas (período)', String(k.copias)],
         ['Recursos descargados', k.recursos + ' de ' + k.totalRecursos],
         ['Generado', fechaHora(new Date().toISOString()) + ' (hora de Chile)'],
       ] },
-      { nombre: 'Por recurso', columnas: [{ titulo: 'Recurso', ancho: 44 }, { titulo: 'Formato', ancho: 14 }, { titulo: 'Etapas', ancho: 30 }, { titulo: 'Descargas (período)', tipo: 'numero', ancho: 20 }, { titulo: 'Total histórico', tipo: 'numero', ancho: 16 }, { titulo: 'Sesiones únicas', tipo: 'numero', ancho: 16 }, { titulo: 'Copias de licencia', tipo: 'numero', ancho: 18 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 18 }],
-        filas: calc.porRecurso.map(function (p) { return [p.recurso.nombre, p.recurso.formato, p.recurso.etapas.join(', '), p.descargas, p.historico, p.sesiones, p.copias, p.versiones, p.ultima ? partes(p.ultima) : null]; }) },
+      { nombre: 'Por recurso', columnas: [{ titulo: 'Recurso', ancho: 44 }, { titulo: 'Formato', ancho: 14 }, { titulo: 'Etapas', ancho: 30 }, { titulo: 'Descargas (período)', tipo: 'numero', ancho: 20 }, { titulo: 'Total histórico', tipo: 'numero', ancho: 16 }, { titulo: 'Correos únicos', tipo: 'numero', ancho: 16 }, { titulo: 'Sesiones únicas', tipo: 'numero', ancho: 16 }, { titulo: 'Copias de licencia', tipo: 'numero', ancho: 18 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 18 }],
+        filas: calc.porRecurso.map(function (p) { return [p.recurso.nombre, p.recurso.formato, p.recurso.etapas.join(', '), p.descargas, p.historico, p.correos, p.sesiones, p.copias, p.versiones, p.ultima ? partes(p.ultima) : null]; }) },
       { nombre: calc.semanal ? 'Por semana' : 'Por día', columnas: [{ titulo: calc.semanal ? 'Semana desde' : 'Día', tipo: 'dia', ancho: 14 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }],
         filas: calc.cubetas.map(function (c) { return [diaAPartes(c.dia), c.n]; }) },
       { nombre: 'Por origen', columnas: [{ titulo: 'Sección', ancho: 34 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }],
         filas: calc.porOrigen.map(function (f) { return [f.nombre, f.n]; }) },
-      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
-        filas: eventosOrdenados().map(function (e) { return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.v, datos.origenes[e.o] || e.o, e.s]; }) },
+      { nombre: 'Por correo', columnas: [{ titulo: 'Correo', ancho: 36 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }, { titulo: 'Primera descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Recursos', ancho: 50 }],
+        filas: porCorreo().map(function (x) { return [x.correo, x.n, partes(x.primera), partes(x.ultima), Array.from(x.recursos).join(', ')]; }) },
+      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Correo', ancho: 34 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
+        filas: eventosOrdenados().map(function (e) { return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.m || '', e.v, datos.origenes[e.o] || e.o, e.s]; }) },
     ];
     XLSXMin.descargar('COGNI-move_descargas_' + hoy() + '.xlsx', hojas);
   });

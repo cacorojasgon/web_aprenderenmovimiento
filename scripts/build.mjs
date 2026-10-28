@@ -1,6 +1,9 @@
 // Build reproducible: src/ -> public/
-// - Extrae los recursos embebidos en base64 (imágenes y descargables), los deduplica y los guarda
-//   con nombre por hash de contenido (caché inmutable).
+// - Extrae las imágenes embebidas en base64, las deduplica y las guarda con nombre por hash de
+//   contenido (caché inmutable).
+// - Los descargables nunca van a public/: viven en recursos/ y solo los entrega /api/descarga tras
+//   aceptar la licencia. Si src/index.html trae uno embebido (versión offline), se compara con
+//   recursos/; en local se actualiza el archivo, en Vercel una diferencia detiene el build.
 // - Imágenes: solo se reducen si superan 3x su alto máximo en pantalla; PNG -> WebP sin pérdida;
 //   JPEG sin reducir se copia byte a byte. Nunca se recomprime con pérdida algo que no cambió de tamaño.
 // - Mueve los <script> inline a archivos externos (la CSP queda en script-src 'self', sin hashes).
@@ -37,10 +40,26 @@ function altoCss(atributos) {
 }
 
 // ---------- 1. Validación contra el catálogo ----------
-function validarCatalogo(html) {
+const EXT_DESCARGABLE = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|zip|rar|7z|epub)(?:[?#"]|$)/i;
+
+async function validarCatalogo(html) {
   const nombres = RECURSOS.map((r) => r.nombre);
   for (const [, nombre] of html.matchAll(/data-recurso="([^"]+)"/g)) {
     if (!nombres.includes(nombre)) errores.push(`Recurso "${nombre}" no está en api/_lib/catalogo.js`);
+  }
+  for (const [boton] of html.matchAll(/<[a-z]+\b[^>]*\bdata-licencia\b[^>]*>/g)) {
+    if (!/data-recurso="[^"]+"/.test(boton)) errores.push(`Botón de descarga sin data-recurso: ${boton.slice(0, 80)}…`);
+  }
+  for (const r of RECURSOS) {
+    try { await readFile(path.join(RAIZ, 'recursos', r.archivo)); } catch { errores.push(`Falta recursos/${r.archivo} (${r.nombre})`); }
+  }
+  // Toda descarga debe pasar por la ventana de licencia: no se admiten enlaces directos a archivos.
+  const sinIncrustados = html.replace(/<div hidden>\s*<a id="[^"]+" href="data:[^"]*"[^>]*>[^<]*<\/a>\s*<\/div>/g, '');
+  for (const [enlace] of sinIncrustados.matchAll(/<a\b[^>]*>/g)) {
+    const href = (enlace.match(/\bhref="([^"]*)"/) || [])[1] || '';
+    if (/\bdownload\b/.test(enlace) || href.startsWith('data:') || (EXT_DESCARGABLE.test(href) && !/^https:\/\/doi\.org\//.test(href))) {
+      errores.push(`Descarga directa sin licencia: ${enlace.slice(0, 100)}… (usa data-licencia + api/_lib/catalogo.js)`);
+    }
   }
   for (const [, motivo] of html.matchAll(/data-motivo="([^"]+)"/g)) {
     if (!MOTIVOS.includes(motivo)) errores.push(`data-motivo "${motivo}" no está en MOTIVOS`);
@@ -54,9 +73,28 @@ function validarCatalogo(html) {
   if (/\son[a-z]+\s*=\s*["']/i.test(html)) errores.push('Hay manejadores de eventos inline (onclick=...): la CSP los bloquea');
 }
 
-// ---------- 2. Recursos embebidos ----------
+// ---------- 2a. Descargables embebidos (versión offline) -> recursos/ ----------
+async function retirarDescargables(html) {
+  const re = /<div hidden>\s*<a id="([^"]+)" href="data:[^;]+;base64,([A-Za-z0-9+/=]+)"[^>]*>[^<]*<\/a>\s*<\/div>\n?/g;
+  const enVercel = Boolean(process.env.VERCEL || process.env.CI);
+  for (const [, id, b64] of html.matchAll(re)) {
+    const recurso = RECURSOS.find((r) => r.ancla === id);
+    if (!recurso) { errores.push(`Archivo embebido "${id}" sin recurso en api/_lib/catalogo.js (campo ancla)`); continue; }
+    const nuevo = Buffer.from(b64, 'base64');
+    const ruta = path.join(RAIZ, 'recursos', recurso.archivo);
+    const actual = await readFile(ruta).catch(() => null);
+    if (actual && actual.equals(nuevo)) continue;
+    if (enVercel) { errores.push(`recursos/${recurso.archivo} no coincide con el archivo embebido en src/index.html`); continue; }
+    await mkdir(path.dirname(ruta), { recursive: true });
+    await writeFile(ruta, nuevo);
+    console.warn(`Aviso: se actualizó recursos/${recurso.archivo} desde src/index.html. Inclúyelo en el commit.`);
+  }
+  return html.replace(re, '');
+}
+
+// ---------- 2b. Imágenes embebidas ----------
 async function extraerRecursos(html) {
-  const re = /<(img|a)\b([^>]*?)\b(src|href)="data:([a-z0-9/.+-]+);base64,([A-Za-z0-9+/=]+)"([^>]*)>/g;
+  const re = /<(img)\b([^>]*?)\b(src)="data:([a-z0-9/.+-]+);base64,([A-Za-z0-9+/=]+)"([^>]*)>/g;
   const ocurrencias = [...html.matchAll(re)];
   const grupos = new Map();
   for (const m of ocurrencias) {
@@ -70,41 +108,33 @@ async function extraerRecursos(html) {
 
   const reporte = [];
   for (const [k, g] of grupos) {
-    if (g.tag === 'img') {
-      const meta = await sharp(g.bytes).metadata();
-      const objetivo = g.altos.length ? Math.ceil(Math.max(...g.altos) * DPR) : meta.height;
-      const reducir = objetivo < meta.height;
-      const nombre = slug((g.atributos.match(/alt="([^"]*)"/) || [])[1] || k);
-      let salida, ext;
-      if (g.mime === 'image/png') {
-        let img = sharp(g.bytes);
-        if (reducir) img = img.resize({ height: objetivo, kernel: 'lanczos3' });
-        const webp = await img.webp({ lossless: true, effort: 6 }).toBuffer();
-        // Si el WebP sin pérdida no es más liviano y no hubo reducción, se conserva el PNG original.
-        if (!reducir && webp.length >= g.bytes.length) [salida, ext] = [g.bytes, 'png'];
-        else [salida, ext] = [webp, 'webp'];
-      } else if (g.mime === 'image/jpeg') {
-        if (reducir) [salida, ext] = [await sharp(g.bytes).resize({ height: objetivo, kernel: 'lanczos3' }).jpeg({ quality: 92, mozjpeg: true }).toBuffer(), 'jpg'];
-        else [salida, ext] = [g.bytes, 'jpg'];
-      } else {
-        [salida, ext] = [g.bytes, g.mime.split('/')[1]];
-      }
-      const final = await sharp(salida).metadata();
-      g.url = await escribir(path.join('assets', 'img', `${nombre}.${hash(salida)}.${ext}`), salida);
-      g.dim = { w: final.width, h: final.height };
-      reporte.push([nombre, kb(g.bytes.length), kb(salida.length), `${meta.width}x${meta.height} -> ${final.width}x${final.height}`]);
+    const meta = await sharp(g.bytes).metadata();
+    const objetivo = g.altos.length ? Math.ceil(Math.max(...g.altos) * DPR) : meta.height;
+    const reducir = objetivo < meta.height;
+    const nombre = slug((g.atributos.match(/alt="([^"]*)"/) || [])[1] || k);
+    let salida, ext;
+    if (g.mime === 'image/png') {
+      let img = sharp(g.bytes);
+      if (reducir) img = img.resize({ height: objetivo, kernel: 'lanczos3' });
+      const webp = await img.webp({ lossless: true, effort: 6 }).toBuffer();
+      // Si el WebP sin pérdida no es más liviano y no hubo reducción, se conserva el PNG original.
+      if (!reducir && webp.length >= g.bytes.length) [salida, ext] = [g.bytes, 'png'];
+      else [salida, ext] = [webp, 'webp'];
+    } else if (g.mime === 'image/jpeg') {
+      if (reducir) [salida, ext] = [await sharp(g.bytes).resize({ height: objetivo, kernel: 'lanczos3' }).jpeg({ quality: 92, mozjpeg: true }).toBuffer(), 'jpg'];
+      else [salida, ext] = [g.bytes, 'jpg'];
     } else {
-      const descarga = (g.atributos.match(/download="([^"]+)"/) || [])[1] || k;
-      const ext = path.extname(descarga) || '.bin';
-      g.url = await escribir(path.join('descargas', `${slug(path.basename(descarga, ext))}.${hash(g.bytes)}${ext}`), g.bytes);
-      reporte.push([descarga, kb(g.bytes.length), kb(g.bytes.length), 'descargable']);
+      [salida, ext] = [g.bytes, g.mime.split('/')[1]];
     }
+    const final = await sharp(salida).metadata();
+    g.url = await escribir(path.join('assets', 'img', `${nombre}.${hash(salida)}.${ext}`), salida);
+    g.dim = { w: final.width, h: final.height };
+    reporte.push([nombre, kb(g.bytes.length), kb(salida.length), `${meta.width}x${meta.height} -> ${final.width}x${final.height}`]);
   }
 
   let primera = true;
   html = html.replace(re, (todo, tag, antes, attr, mime, b64, despues) => {
     const g = grupos.get(hash(Buffer.from(b64, 'base64')));
-    if (tag === 'a') return `<a${antes}${attr}="${g.url}"${despues}>`;
     const carga = primera ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
     primera = false;
     return `<img${antes}src="${g.url}" width="${g.dim.w}" height="${g.dim.h}"${carga}${despues}>`;
@@ -176,12 +206,13 @@ async function copiarAdmin() {
 const inicio = Date.now();
 await rm(OUT, { recursive: true, force: true });
 const fuente = await readFile(path.join(SRC, 'index.html'), 'utf8');
-validarCatalogo(fuente);
+const sinDescargables = await retirarDescargables(fuente);
+await validarCatalogo(fuente);
 if (errores.length) {
   console.error('Build detenido:\n- ' + errores.join('\n- '));
   process.exit(1);
 }
-let { html, reporte, ocurrencias, unicos } = await extraerRecursos(fuente);
+let { html, reporte, ocurrencias, unicos } = await extraerRecursos(sinDescargables);
 html = await externalizarScripts(html);
 if (/(src|href)="data:/.test(html)) throw new Error('Quedó un recurso embebido sin extraer');
 await escribir('index.html', Buffer.from(html));

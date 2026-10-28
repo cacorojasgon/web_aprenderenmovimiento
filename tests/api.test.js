@@ -1,8 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { validarContacto, armarCorreo } from '../api/contacto.js';
 import { validarRegistro } from '../api/registro.js';
+import { validarDescarga, POST } from '../api/descarga.js';
+import { RECURSOS, VERSION_VIGENTE } from '../api/_lib/catalogo.js';
 import { hashPassword, verificarCredenciales, cookieSesion, sesionValida } from '../api/_lib/auth.js';
 
 const base = {
@@ -39,17 +42,55 @@ test('contacto: el correo escapa HTML y el asunto no admite saltos de línea', (
 });
 
 const sesion = '3f2b8c1e-9a4d-4c2b-8e1f-0a1b2c3d4e5f';
+const RECURSO = 'Plantilla de ficha de actividad en aula';
 test('registro: guarda solo campos permitidos y normaliza el origen', () => {
-  const r = validarRegistro({ evento: 'descarga', recurso: 'Plantilla de ficha de actividad en aula', version: '1.0', origen: 'zzz', sesion, extra: 'x' });
-  assert.deepEqual(r, { e: 'descarga', r: 'plantilla-ficha-aula', v: '1.0', o: 'otro', s: sesion });
+  const r = validarRegistro({ evento: 'copia_licencia', recurso: RECURSO, version: VERSION_VIGENTE, origen: 'zzz', sesion, extra: 'x' });
+  assert.deepEqual(r, { e: 'copia_licencia', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'otro', s: sesion });
 });
 
 test('registro: rechaza recurso, versión, evento o sesión inválidos', () => {
-  const ok = { evento: 'descarga', recurso: 'Plantilla de ficha de actividad en aula', version: '1.0', sesion };
+  const ok = { evento: 'copia_licencia', recurso: RECURSO, version: VERSION_VIGENTE, sesion };
   assert.equal(validarRegistro({ ...ok, recurso: 'Otro' }), null);
   assert.equal(validarRegistro({ ...ok, version: '9.9' }), null);
+  assert.equal(validarRegistro({ ...ok, version: '1.0' }), null);
   assert.equal(validarRegistro({ ...ok, evento: '__proto__' }), null);
   assert.equal(validarRegistro({ ...ok, sesion: 'abc' }), null);
+});
+
+test('registro: una descarga no puede registrarse sin pasar por /api/descarga', () => {
+  assert.equal(validarRegistro({ evento: 'descarga', recurso: RECURSO, version: VERSION_VIGENTE, sesion }), null);
+});
+
+const pedido = { recurso: RECURSO, version: VERSION_VIGENTE, email: ' Ana.Perez@Colegio.cl ', acepta: true, origen: 'esc', sesion };
+test('descarga: exige licencia vigente aceptada y correo, y registra el correo normalizado', () => {
+  const { evento, recurso } = validarDescarga(pedido);
+  assert.equal(recurso.archivo, 'plantilla-ficha-aula.docx');
+  assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl' });
+  assert.ok(validarDescarga({ ...pedido, acepta: 'true' }).error);
+  assert.ok(validarDescarga({ ...pedido, acepta: undefined }).error);
+  assert.ok(validarDescarga({ ...pedido, version: '1.0' }).error);
+  assert.ok(validarDescarga({ ...pedido, email: '' }).error);
+  assert.ok(validarDescarga({ ...pedido, email: 'no-es-correo' }).error);
+  assert.ok(validarDescarga({ ...pedido, email: 'a@b.cl\r\nBcc: x@y.z' }).error);
+  assert.ok(validarDescarga({ ...pedido, email: ['a@b.cl'] }).error);
+  assert.ok(validarDescarga({ ...pedido, recurso: '__proto__' }).error);
+  assert.ok(validarDescarga({ ...pedido, sesion: 'abc' }).error);
+});
+
+test('descarga: cada recurso del catálogo tiene su archivo en recursos/', async () => {
+  for (const r of RECURSOS) assert.ok((await readFile(new URL(`../recursos/${r.archivo}`, import.meta.url))).length > 0, r.archivo);
+});
+
+test('descarga: sin almacenamiento configurado no entrega el archivo', async () => {
+  const antes = { url: process.env.KV_REST_API_URL, up: process.env.UPSTASH_REDIS_REST_URL };
+  delete process.env.KV_REST_API_URL; delete process.env.UPSTASH_REDIS_REST_URL;
+  const r = await POST(new Request('https://sitio.cl/api/descarga', {
+    method: 'POST', headers: { origin: 'https://sitio.cl', host: 'sitio.cl', 'content-type': 'application/json' }, body: JSON.stringify(pedido),
+  }));
+  if (antes.url) process.env.KV_REST_API_URL = antes.url;
+  if (antes.up) process.env.UPSTASH_REDIS_REST_URL = antes.up;
+  assert.equal(r.status, 503);
+  assert.match(r.headers.get('content-type'), /json/);
 });
 
 test('auth: verifica la contraseña con scrypt y la sesión firmada', () => {
