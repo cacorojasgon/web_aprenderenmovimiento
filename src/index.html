@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Cognición en Movimiento (COGNI-move), Universidad Andrés Bello: modelo que integra el desafío cognitivo en la actividad física para fortalecer funciones ejecutivas, aprendizaje y desempeño, desde la primera infancia hasta la adultez.">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#0C1630">
 <title>Cognición en Movimiento · COGNI-move</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;display=swap">
@@ -44,6 +49,9 @@ details summary{cursor:pointer}
 html{scroll-padding-top:140px}
 .saltar{position:absolute;left:8px;top:-60px;z-index:20;background:#FFFFFF;color:#14213D;padding:10px 16px;border-radius:8px;font-weight:700}
 .saltar:focus{top:8px}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.contacto-estado{margin:0;font-size:15px;font-weight:700;min-height:1.4em}.contacto-estado.ok{color:#0F7C6E}.contacto-estado.error{color:#B3261E}
+#form-contacto button[disabled]{opacity:.7;cursor:progress}
 @media (max-width: 600px){header img{height:40px !important}nav[aria-label="Principal"]{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}nav[aria-label="Principal"].nav-fin{-webkit-mask-image:none;mask-image:none}}
 </style>
 
@@ -617,21 +625,24 @@ html{scroll-padding-top:140px}
 <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(34px, 6vw, 52px); line-height: 1.08">Hablemos</h2>
 <p style="margin: 0; color: #D6DDEE">Escríbenos para solicitar información, acceder a un recurso o coordinar una jornada en tu institución.</p>
 </div>
-<form style="background: #FFFFFF; color: #14213D; border-radius: 20px; padding: clamp(20px, 4vw, 28px); display: flex; flex-direction: column; gap: 14px; font-size: 15px">
+<form id="form-contacto" style="background: #FFFFFF; color: #14213D; border-radius: 20px; padding: clamp(20px, 4vw, 28px); display: flex; flex-direction: column; gap: 14px; font-size: 15px">
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Nombre<input type="text" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Correo electrónico<input type="email" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Institución<input type="text" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Cargo<input type="text" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Nombre<input type="text" name="nombre" required maxlength="100" autocomplete="name" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Correo electrónico<input type="email" name="email" required maxlength="254" autocomplete="email" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Institución<input type="text" name="institucion" maxlength="150" autocomplete="organization" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Cargo<input type="text" name="cargo" maxlength="100" autocomplete="organization-title" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">País<select style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"><option>Chile</option><option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Colombia</option><option>Ecuador</option><option>España</option><option>México</option><option>Perú</option><option>Uruguay</option><option>Estados Unidos</option><option>Otro</option></select></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Ciudad<input type="text" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">País<select name="pais" autocomplete="country-name" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"><option>Chile</option><option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Colombia</option><option>Ecuador</option><option>España</option><option>México</option><option>Perú</option><option>Uruguay</option><option>Estados Unidos</option><option>Otro</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Ciudad<input type="text" name="ciudad" maxlength="100" autocomplete="address-level2" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></label>
 </div>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Motivo<select id="motivo" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"><option>Solicitar información general</option><option>Implementar la estrategia en aula</option><option>Implementar el programa deportivo Sport+EF</option><option>Evaluación y formación cognitivo-motora en adultez</option><option>Solicitar un manual</option><option>Solicitar una jornada o formación</option><option>Proponer el modelo en mi escuela</option><option>Investigación, tesis o colaboración</option><option>Otro</option></select></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Mensaje<textarea rows="4" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></textarea></label>
-<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px"><input type="checkbox" style="margin-top: 4px">Acepto que la Universidad Andrés Bello use estos datos solo para responder mi solicitud.</label>
-<button type="button" style="align-self: flex-start; font: inherit; font-weight: 700; color: #FFFFFF; background: #2346C8; border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer">Enviar mensaje</button>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Motivo<select id="motivo" name="motivo" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"><option>Solicitar información general</option><option>Implementar la estrategia en aula</option><option>Implementar el programa deportivo Sport+EF</option><option>Evaluación y formación cognitivo-motora en adultez</option><option>Solicitar un manual</option><option>Solicitar una jornada o formación</option><option>Proponer el modelo en mi escuela</option><option>Investigación, tesis o colaboración</option><option>Otro</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 700">Mensaje<textarea name="mensaje" rows="4" required maxlength="3000" style="font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid #B8C2D9; border-radius: 8px"></textarea></label>
+<label style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px"><input type="checkbox" name="consentimiento" required style="margin-top: 4px">Acepto que la Universidad Andrés Bello use estos datos solo para responder mi solicitud.</label>
+<input type="hidden" name="origen" id="contacto-origen" value="">
+<div class="hp" aria-hidden="true"><label>No completar este campo<input type="text" name="sitio_web" tabindex="-1" autocomplete="off"></label></div>
+<button type="submit" style="align-self: flex-start; font: inherit; font-weight: 700; color: #FFFFFF; background: #2346C8; border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer">Enviar mensaje</button>
+<p id="contacto-estado" class="contacto-estado" role="status" aria-live="polite"></p>
 </form>
 </div>
 </section>
@@ -911,12 +922,39 @@ html:has(.lic-dialog[open]){overflow:hidden}
  document.addEventListener('click',function(e){
   var a=e.target.closest&&e.target.closest('[data-motivo],[data-tab]');
   if(!a)return;
-  if(a.hasAttribute('data-motivo')){var m=document.getElementById('motivo');if(m)m.value=a.getAttribute('data-motivo');}
+  if(a.hasAttribute('data-motivo')){var m=document.getElementById('motivo');if(m)m.value=a.getAttribute('data-motivo');var o=document.getElementById('contacto-origen');if(o){var sec=a.closest('section');o.value=((sec&&sec.id)||'menu')+' · '+a.textContent.trim();}}
   if(a.hasAttribute('data-tab')){var r=document.getElementById(a.getAttribute('data-tab'));if(r)r.checked=true;}
  });
  var nav=document.querySelector('nav[aria-label="Principal"]');
  function finNav(){if(nav)nav.classList.toggle('nav-fin',nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-4);}
  if(nav){nav.addEventListener('scroll',finNav,{passive:true});window.addEventListener('resize',finNav);finNav();}
+
+ /* Registro de aceptaciones (cláusula 12 de la licencia): fecha, versión, recurso e identificador técnico de sesión */
+ function uuid(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();var b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=b[6]&15|64;b[8]=b[8]&63|128;var x=[].map.call(b,function(n){return(n+256).toString(16).slice(1)}).join('');return x.slice(0,8)+'-'+x.slice(8,12)+'-'+x.slice(12,16)+'-'+x.slice(16,20)+'-'+x.slice(20);}
+ function sesion(){try{var v=sessionStorage.getItem('cm_sesion');if(!v){v=uuid();sessionStorage.setItem('cm_sesion',v);}return v;}catch(_){return uuid();}}
+ var origenDescarga='otro';
+ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-licencia]');if(!a)return;var p=a.closest('.ap-panel');var m=p&&p.className.match(/ap-panel-(inf|esc|adu)/);origenDescarga=m?m[1]:'otro';},true);
+ function registrar(evento,d){try{fetch('/api/registro',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({evento:evento,recurso:d.recurso||'',version:d.version||'',origen:origenDescarga,sesion:sesion()})}).catch(function(){});}catch(_){}}
+ window.addEventListener('cognimove:licencia-aceptada',function(e){registrar('descarga',e.detail||{});});
+ window.addEventListener('cognimove:licencia-copia',function(e){registrar('copia_licencia',e.detail||{});});
+
+ /* Formulario de contacto */
+ var form=document.getElementById('form-contacto');
+ if(form){
+  var estado=document.getElementById('contacto-estado'),enviar=form.querySelector('button[type=submit]');
+  form.addEventListener('submit',function(e){
+   e.preventDefault();if(enviar.disabled)return;
+   var datos={};new FormData(form).forEach(function(v,k){datos[k]=String(v).trim();});
+   datos.consentimiento=form.elements.consentimiento.checked;
+   var etiqueta=enviar.textContent;enviar.disabled=true;enviar.textContent='Enviando…';estado.className='contacto-estado';estado.textContent='';
+   function fin(ok,txt){estado.textContent=txt;estado.classList.add(ok?'ok':'error');enviar.disabled=false;enviar.textContent=etiqueta;}
+   fetch('/api/contacto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)})
+    .then(function(r){return r.json().catch(function(){return{};}).then(function(j){
+     if(r.ok){form.reset();document.getElementById('contacto-origen').value='';fin(true,j.mensaje||'¡Gracias! Recibimos tu mensaje y te responderemos pronto.');}
+     else fin(false,j.error||'No pudimos enviar tu mensaje. Inténtalo nuevamente en unos minutos.');});})
+    .catch(function(){fin(false,'No pudimos enviar tu mensaje. Revisa tu conexión e inténtalo nuevamente.');});
+  });
+ }
 })();
 (function(){
  var VERSION='1.0';
@@ -1100,6 +1138,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
  var bCopia=document.getElementById('licencia-copia');
  bCopia.addEventListener('click',function(){
   if(bCopia.disabled)return;
+  try{window.dispatchEvent(new CustomEvent('cognimove:licencia-copia',{detail:{version:VERSION,recurso:actual?actual.recurso:''}}));}catch(_){}
   var et=bCopia.textContent; bCopia.disabled=true; bCopia.textContent='Preparando PDF…';
   cargarJsPDF().then(generarPDF).catch(function(){copiaTexto();})
    .then(function(){bCopia.disabled=false; bCopia.textContent=et;});

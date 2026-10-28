@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel de descargas · COGNI-move</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+
+<main id="vista-login" class="login" hidden>
+  <form id="form-login" class="login-card" autocomplete="on">
+    <p class="eyebrow">Cognición en Movimiento</p>
+    <h1>Panel de descargas</h1>
+    <label>Usuario<input name="usuario" autocomplete="username" required maxlength="100"></label>
+    <label>Contraseña<input name="password" type="password" autocomplete="current-password" required maxlength="200"></label>
+    <button type="submit" class="btn btn-pri">Ingresar</button>
+    <p id="login-estado" class="estado" role="status" aria-live="polite"></p>
+  </form>
+</main>
+
+<p id="vista-error" class="aviso-global" role="alert" hidden></p>
+
+<div id="vista-panel" hidden>
+  <header class="barra">
+    <div>
+      <p class="eyebrow">Cognición en Movimiento · Panel interno</p>
+      <h1>Descargas y licencias</h1>
+    </div>
+    <div class="acciones">
+      <span id="actualizado" class="muted"></span>
+      <button type="button" id="btn-actualizar" class="btn">Actualizar</button>
+      <button type="button" id="btn-excel" class="btn btn-pri">Descargar Excel</button>
+      <button type="button" id="btn-salir" class="btn">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="contenido">
+    <div class="filtros" role="group" aria-label="Filtros">
+      <label>Período
+        <select id="f-periodo">
+          <option value="7">Últimos 7 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+          <option value="todo">Todo el registro</option>
+          <option value="rango">Rango personalizado</option>
+        </select>
+      </label>
+      <label class="rango" hidden>Desde<input type="date" id="f-desde"></label>
+      <label class="rango" hidden>Hasta<input type="date" id="f-hasta"></label>
+      <label>Recurso<select id="f-recurso"><option value="">Todos los recursos</option></select></label>
+      <div class="vistas" role="tablist" aria-label="Vista">
+        <button type="button" role="tab" id="tab-resumen" aria-selected="true" aria-controls="vista-resumen">Resumen</button>
+        <button type="button" role="tab" id="tab-tablas" aria-selected="false" aria-controls="vista-tablas" tabindex="-1">Tablas</button>
+      </div>
+    </div>
+
+    <section id="vista-resumen" role="tabpanel" aria-labelledby="tab-resumen">
+      <div class="kpis">
+        <div class="kpi kpi-hero"><p class="kpi-label">Descargas con licencia aceptada</p><p class="kpi-valor" id="k-descargas">0</p><p class="kpi-nota" id="k-descargas-nota"></p></div>
+        <div class="kpi"><p class="kpi-label">Sesiones únicas</p><p class="kpi-valor" id="k-sesiones">0</p><p class="kpi-nota">Identificador técnico, sin datos personales</p></div>
+        <div class="kpi"><p class="kpi-label">Copias de la licencia guardadas</p><p class="kpi-valor" id="k-copias">0</p><p class="kpi-nota">PDF o texto desde la ventana de descarga</p></div>
+        <div class="kpi"><p class="kpi-label">Recursos descargados</p><p class="kpi-valor" id="k-recursos">0</p><p class="kpi-nota" id="k-recursos-nota"></p></div>
+      </div>
+
+      <div class="graficos">
+        <figure class="card">
+          <figcaption><h2 id="g-dia-titulo">Descargas por día</h2><p class="muted">Hora de Chile</p></figcaption>
+          <div class="grafico" id="g-dia"></div>
+        </figure>
+        <figure class="card">
+          <figcaption><h2>Descargas por sección de origen</h2><p class="muted">Desde qué pestaña de Aplicaciones se descargó</p></figcaption>
+          <div class="grafico" id="g-origen"></div>
+        </figure>
+      </div>
+
+      <section class="card">
+        <h2>Activos descargables</h2>
+        <div id="activos" class="activos"></div>
+      </section>
+    </section>
+
+    <section id="vista-tablas" role="tabpanel" aria-labelledby="tab-tablas" hidden>
+      <section class="card">
+        <h2>Resumen por recurso</h2>
+        <div class="tabla-wrap"><table id="t-recursos"></table></div>
+      </section>
+      <div class="graficos">
+        <section class="card"><h2>Descargas por día</h2><div class="tabla-wrap alto"><table id="t-dias"></table></div></section>
+        <section class="card"><h2>Por sección de origen</h2><div class="tabla-wrap"><table id="t-origen"></table></div></section>
+      </div>
+      <section class="card">
+        <div class="card-cab"><h2>Registro de aceptaciones</h2><p class="muted" id="t-eventos-nota"></p></div>
+        <div class="tabla-wrap"><table id="t-eventos"></table></div>
+        <div class="paginacion">
+          <button type="button" class="btn" id="pag-ant">Anterior</button>
+          <span id="pag-info" class="muted"></span>
+          <button type="button" class="btn" id="pag-sig">Siguiente</button>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div id="tooltip" class="tooltip" role="presentation" hidden></div>
+
+<script src="/admin/xlsx.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>

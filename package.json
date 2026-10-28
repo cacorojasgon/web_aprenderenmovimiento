@@ -1,0 +1,17 @@
+{
+  "name": "cognicion-en-movimiento",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/dev.mjs",
+    "hash-password": "node scripts/hash-password.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "sharp": "0.34.3"
+  }
+}
