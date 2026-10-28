@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cognición en Movimiento (COGNI-move), Universidad Andrés Bello: modelo que integra el desafío cognitivo en la actividad física para fortalecer funciones ejecutivas, aprendizaje y desempeño, desde la primera infancia hasta la adultez.">
 <title>Cognición en Movimiento · COGNI-move</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;display=swap">
@@ -40,10 +41,15 @@ details summary{cursor:pointer}
 #ap-inf:checked ~ .ap-panel-inf,#ap-esc:checked ~ .ap-panel-esc,#ap-adu:checked ~ .ap-panel-adu{display:flex}
 .pasos-wrap{display:flex;flex-direction:column;gap:12px}.pasos{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}.pasos li{position:relative;background:#FFFFFF;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:6px}.paso-n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:32px;line-height:1;color:#A8471B}.paso-t{font-weight:700;color:#14213D}.paso-d{font-size:15px;color:#3B4763}.pasos li:not(:last-child)::after{content:"";position:absolute;top:35px;right:-24px;width:18px;height:2px;background:#A8471B}.pasos li:not(:last-child)::before{content:"";position:absolute;top:31px;right:-27px;border-left:8px solid #A8471B;border-top:5px solid transparent;border-bottom:5px solid transparent}.ciclo{display:grid;grid-template-columns:repeat(4,1fr);column-gap:28px}.ciclo-u{grid-column:2/5;height:20px;margin:0 calc((100% - 56px)/6);border:2px dashed #A8471B;border-top:0;border-radius:0 0 12px 12px;position:relative}.ciclo-u::before{content:"";position:absolute;left:-7px;top:-8px;border-bottom:9px solid #A8471B;border-left:6px solid transparent;border-right:6px solid transparent}.ciclo-t{grid-column:2/5;margin:6px 0 0;text-align:center;font-size:14px;font-weight:700;color:#A8471B}.codiseno{margin:4px 0 0;padding:12px 16px;border-radius:10px;background:#FFFFFF;border-left:4px solid #A8471B;font-weight:700;color:#14213D}@media (max-width: 900px){.pasos{grid-template-columns:1fr;gap:14px}.pasos li{display:grid;grid-template-columns:40px 1fr;column-gap:12px;row-gap:4px;padding:16px}.paso-n{grid-row:1/3;font-size:28px}.pasos li:not(:last-child)::after{top:auto;bottom:-14px;right:auto;left:35px;width:2px;height:14px}.pasos li:not(:last-child)::before{display:none}.ciclo{display:block}.ciclo-u{display:none}.ciclo-t{text-align:left;margin:0}}.pend{opacity:.5;cursor:default;user-select:none}
 @media (max-width: 600px){.red-qr{display:none !important}.pq-card{display:grid !important;grid-template-columns:auto 1fr;column-gap:12px;row-gap:6px !important;align-items:center;padding:18px !important}.pq-card>p{grid-column:1/-1}.pq-card h3{font-size:19px !important}svg.pq-ico{width:28px;height:28px}img.pq-ico{height:30px !important}}
+html{scroll-padding-top:140px}
+.saltar{position:absolute;left:8px;top:-60px;z-index:20;background:#FFFFFF;color:#14213D;padding:10px 16px;border-radius:8px;font-weight:700}
+.saltar:focus{top:8px}
+@media (max-width: 600px){header img{height:40px !important}nav[aria-label="Principal"]{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}nav[aria-label="Principal"].nav-fin{-webkit-mask-image:none;mask-image:none}}
 </style>
 
 </head>
 <body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
 
 
 <div style="font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: #14213D; background: #FFFFFF; font-size: 18px; line-height: 1.6">
@@ -60,11 +66,12 @@ details summary{cursor:pointer}
 <a href="#equipo" style="text-decoration: none; color: #FFFFFF; padding: 8px 12px; border-radius: 8px; font-size: 16px">Equipo</a>
 <a href="#formacion" style="text-decoration: none; color: #FFFFFF; padding: 8px 12px; border-radius: 8px; font-size: 16px">Formación</a>
 <a href="#preguntas" style="text-decoration: none; color: #FFFFFF; padding: 8px 12px; border-radius: 8px; font-size: 16px">Preguntas frecuentes</a>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Solicitar información general'" style="text-decoration: none; color: #FFFFFF; background: #E8692E; padding: 8px 16px; border-radius: 8px; font-size: 16px; font-weight: 700">Contacto</a>
+<a href="#contacto" data-motivo="Solicitar información general" style="text-decoration: none; color: #FFFFFF; background: #C2541C; padding: 8px 16px; border-radius: 8px; font-size: 16px; font-weight: 700">Contacto</a>
 </nav>
 </div>
 </header>
 
+<main id="contenido">
 <section id="inicio" style="background: #F2F5FC">
 <div style="max-width: 1200px; margin: 0 auto; padding: clamp(48px, 9vw, 88px) clamp(16px, 4vw, 32px) clamp(40px, 7vw, 72px); display: flex; flex-direction: column; gap: 28px">
 <p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #2346C8">Modelo Cognición en Movimiento · Universidad Andrés Bello</p>
@@ -138,9 +145,9 @@ details summary{cursor:pointer}
 <div style="display: flex; flex-direction: column; gap: 28px">
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px">Un modelo para todo el ciclo vital</h3>
 <div class="vida">
-<div class="vida-item" style="--c: #7FD6C9"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7FD6C9">Primera infancia</p><p style="margin: 0; font-weight: 700">Sala cuna y jardín infantil</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Estrategia cognitivo-motora que fortalece los aprendizajes iniciales en preescolares.</p><label for="ap-inf" style="cursor: pointer; font-size: 15px; font-weight: 700; text-decoration: underline">Ver aplicación →</label></div>
-<div class="vida-item" style="--c: #FFB48A"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFB48A">Etapa escolar</p><p style="margin: 0; font-weight: 700">Aula y talleres deportivos</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Aula cognitivo-motora y deporte cognitivamente enriquecido.</p><label for="ap-esc" style="cursor: pointer; font-size: 15px; font-weight: 700; text-decoration: underline">Ver aplicación →</label></div>
-<div class="vida-item" style="--c: #9DB4FF"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9DB4FF">Adultez</p><p style="margin: 0; font-weight: 700">Contextos de alta exigencia</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Evaluación y entrenamiento cognitivo-motor con alta exigencia física y cognitiva.</p><label for="ap-adu" style="cursor: pointer; font-size: 15px; font-weight: 700; text-decoration: underline">Ver aplicación →</label></div>
+<div class="vida-item" style="--c: #7FD6C9"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7FD6C9">Primera infancia</p><p style="margin: 0; font-weight: 700">Sala cuna y jardín infantil</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Estrategia cognitivo-motora que fortalece los aprendizajes iniciales en preescolares.</p><a href="#aplicaciones" data-tab="ap-inf" style="font-size: 15px; font-weight: 700">Ver aplicación →</a></div>
+<div class="vida-item" style="--c: #FFB48A"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFB48A">Etapa escolar</p><p style="margin: 0; font-weight: 700">Aula y talleres deportivos</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Aula cognitivo-motora y deporte cognitivamente enriquecido.</p><a href="#aplicaciones" data-tab="ap-esc" style="font-size: 15px; font-weight: 700">Ver aplicación →</a></div>
+<div class="vida-item" style="--c: #9DB4FF"><p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9DB4FF">Adultez</p><p style="margin: 0; font-weight: 700">Contextos de alta exigencia</p><p style="margin: 0; font-size: 16px; color: #D6DDEE">Evaluación y entrenamiento cognitivo-motor con alta exigencia física y cognitiva.</p><a href="#aplicaciones" data-tab="ap-adu" style="font-size: 15px; font-weight: 700">Ver aplicación →</a></div>
 </div>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px; border-left: 4px solid #E8692E; padding-left: clamp(16px, 3vw, 24px); max-width: 980px">
@@ -191,16 +198,16 @@ details summary{cursor:pointer}
 <input type="radio" name="ap-tab" id="ap-inf">
 <input type="radio" name="ap-tab" id="ap-esc" checked="">
 <input type="radio" name="ap-tab" id="ap-adu">
-<div class="ap-tablist" role="tablist"><label for="ap-inf" style="--c: #0F7C6E">Primera infancia</label><label for="ap-esc" style="--c: #C2541C">Etapa escolar</label><label for="ap-adu" style="--c: #2346C8">Adultez</label></div>
+<div class="ap-tablist"><label for="ap-inf" style="--c: #0F7C6E">Primera infancia</label><label for="ap-esc" style="--c: #C2541C">Etapa escolar</label><label for="ap-adu" style="--c: #2346C8">Adultez</label></div>
 
-<div class="ap-panel ap-panel-inf" role="tabpanel">
+<div class="ap-panel ap-panel-inf">
 <article style="background: #E9F7F3; border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: flex; flex-direction: column; gap: 14px; max-width: 860px">
 <p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0F7C6E">Primera infancia · Sala cuna y jardín infantil</p>
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px">Aula cognitivo-motora en educación parvularia</h3>
 <p style="margin: 0; color: #3B4763">La estrategia en aula se adapta a la educación parvularia. Integra movimiento y aprendizaje en experiencias breves y lúdicas, diseñadas según los ámbitos y núcleos de aprendizaje de cada nivel.</p>
 <p style="margin: 0; color: #3B4763"><strong style="color: #14213D">Cómo:</strong> experiencias de aprendizaje codiseñadas con el equipo educativo, que usan el juego, el cuerpo y materiales de bajo costo para estimular las funciones ejecutivas desde los primeros años.</p>
 <p style="margin: 0; color: #3B4763"><strong style="color: #14213D">Para quién:</strong> párvulos y sus equipos educativos.</p>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Implementar la estrategia en aula'" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #0F7C6E; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
+<a href="#contacto" data-motivo="Implementar la estrategia en aula" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #0F7C6E; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
 </article>
 <div style="border: 2px solid #0F7C6E; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px; max-width: 860px">
 <p style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0F7C6E">Recurso descargable</p>
@@ -211,7 +218,7 @@ details summary{cursor:pointer}
 </div>
 </div>
 
-<div class="ap-panel ap-panel-esc" role="tabpanel">
+<div class="ap-panel ap-panel-esc">
 <p style="margin: 0; color: #3B4763">En el contexto escolar, Cognición en Movimiento se aplica dentro del aula y en los talleres deportivos extracurriculares.</p>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px">
 <article style="background: #F2F5FC; border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: flex; flex-direction: column; gap: 14px">
@@ -253,7 +260,7 @@ details summary{cursor:pointer}
 <a href="#contacto" data-licencia data-archivo="archivo-plantilla-ficha" data-recurso="Plantilla de ficha de actividad en aula" data-formato="Word (.docx)" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #2346C8; background: #FFFFFF; border: 2px solid #2346C8; border-radius: 10px; padding: 10px 16px; font-weight: 700; font-size: 15px">↓ Descargar plantilla (Word)</a>
 <p class="lic-hint">Descarga gratuita, sujeta a la aceptación de la licencia de uso.</p>
 </div>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Implementar la estrategia en aula'" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #2346C8; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
+<a href="#contacto" data-motivo="Implementar la estrategia en aula" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #2346C8; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
 </article>
 <article style="background: #FFF3EC; border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: flex; flex-direction: column; gap: 14px">
 <p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #A8471B">Estrategia 2 · En talleres extracurriculares</p>
@@ -298,19 +305,19 @@ details summary{cursor:pointer}
 </div>
 </details>
 <p style="margin: 0; font-size: 15px; color: #3B4763">Los programas Sport+EF ofrecen herramientas concretas para enriquecer cognitivamente la práctica deportiva escolar, sin renunciar a su carácter lúdico ni a su exigencia física. Están dirigidos a profesionales de las ciencias de la rehabilitación, profesores, entrenadores, estudiantes en formación y familias que buscan una actividad deportiva que también estimule el pensamiento de sus hijos e hijas.</p>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Solicitar un manual'" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #A8471B; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar el manual</a>
+<a href="#contacto" data-motivo="Solicitar un manual" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #A8471B; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar el manual</a>
 </article>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px">
 <div id="familias" style="background: #F2F5FC; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px">Para las familias</h3>
 <p style="margin: 0; font-size: 16px; color: #3B4763">En las escuelas que aplican Cognición en Movimiento, niñas y niños aprenden con el cuerpo en movimiento. Juegan, toman decisiones y resuelven desafíos mientras abordan los contenidos de sus asignaturas habituales o practican un deporte. Si te interesa proponerlo en la escuela o el jardín de tu hijo o hija, escríbenos.</p>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Proponer el modelo en mi escuela'" style="font-weight: 700">Proponerlo en mi escuela →</a>
+<a href="#contacto" data-motivo="Proponer el modelo en mi escuela" style="font-weight: 700">Proponerlo en mi escuela →</a>
 </div>
 </div>
 </div>
 
-<div class="ap-panel ap-panel-adu" role="tabpanel">
+<div class="ap-panel ap-panel-adu">
 <article style="background: #EEF2FD; border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: flex; flex-direction: column; gap: 14px; max-width: 860px">
 <p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2346C8">Adultez · Contextos de alta exigencia</p>
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px">Rendimiento cognitivo-motor en la adultez</h3>
@@ -325,7 +332,7 @@ details summary{cursor:pointer}
 <p style="margin: 0; font-size: 16px; color: #3B4763">Evaluación y formación cognitivo-motora para instructores militares de educación física, en contextos donde la demanda cognitiva se produce bajo carga física, incertidumbre y consecuencia operacional.</p>
 <p style="margin: 0; font-size: 16px; color: #3B4763"><strong style="color: #14213D">Cómo:</strong> una batería diseñada para las demandas reales del personal militar. Combina un sistema de valoración cognitiva de uso internacional con una tecnología que mide cognición y desempeño físico en una misma tarea, de modo que la persona resuelve el problema mientras se desplaza, cambia de dirección y sostiene el equilibrio.</p>
 <p style="margin: 0; font-size: 16px; color: #3B4763"><strong style="color: #14213D">Qué incluye:</strong> estrategia formativa, ciclos de evaluación cognitivo-motora en los laboratorios de la Facultad de Ciencias de la Rehabilitación de la Universidad Andrés Bello y trabajo técnico continuo entre ambos equipos.</p>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Evaluación y formación cognitivo-motora en adultez'" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #2346C8; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
+<a href="#contacto" data-motivo="Evaluación y formación cognitivo-motora en adultez" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #2346C8; border-radius: 10px; padding: 12px 20px; font-weight: 700">Solicitar información</a>
 </article>
 </div>
 </div>
@@ -519,7 +526,7 @@ details summary{cursor:pointer}
 <p class="codiseno">Codiseño entre la institución y el equipo COGNI-move en todas las etapas</p>
 </div>
 </div>
-<a href="#contacto" onclick="var m=document.getElementById('motivo');if(m)m.value='Solicitar una jornada o formación'" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #A8471B; border-radius: 10px; padding: 14px 22px; font-weight: 700">Solicitar una jornada</a>
+<a href="#contacto" data-motivo="Solicitar una jornada o formación" style="align-self: flex-start; text-decoration: none; color: #FFFFFF; background: #A8471B; border-radius: 10px; padding: 14px 22px; font-weight: 700">Solicitar una jornada</a>
 </div>
 </section>
 
@@ -533,8 +540,8 @@ details summary{cursor:pointer}
 <div class="faq-tabs" style="display: flex; flex-direction: column; gap: 24px">
 <input type="radio" name="faq-tab" id="faq-aula" checked="">
 <input type="radio" name="faq-tab" id="faq-cancha">
-<div class="faq-tablist" role="tablist"><label for="faq-aula">En el aula</label><label for="faq-cancha">En contexto deportivo</label></div>
-<div class="faq-panel faq-panel-aula" role="tabpanel" style="flex-direction: column; gap: 28px">
+<div class="faq-tablist"><label for="faq-aula">En el aula</label><label for="faq-cancha">En contexto deportivo</label></div>
+<div class="faq-panel faq-panel-aula" style="flex-direction: column; gap: 28px">
 <div style="display: flex; flex-direction: column; gap: 10px">
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px">¿Puedo implementarlo?</h3>
 <div style="display: flex; flex-direction: column; gap: 8px">
@@ -565,7 +572,7 @@ details summary{cursor:pointer}
 </div>
 </div>
 </div>
-<div class="faq-panel faq-panel-cancha" role="tabpanel" style="flex-direction: column; gap: 28px">
+<div class="faq-panel faq-panel-cancha" style="flex-direction: column; gap: 28px">
 <div style="display: flex; flex-direction: column; gap: 10px">
 <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px">¿Puedo implementarlo?</h3>
 <div style="display: flex; flex-direction: column; gap: 8px">
@@ -628,6 +635,7 @@ details summary{cursor:pointer}
 </form>
 </div>
 </section>
+</main>
 
 <footer style="background: #0C1630; color: #A9B4CF">
 <div style="max-width: 1200px; margin: 0 auto; padding: 32px clamp(16px, 4vw, 32px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px 48px; font-size: 14px; line-height: 1.5">
@@ -897,6 +905,20 @@ html:has(.lic-dialog[open]){overflow:hidden}
 
 <script>
 (function(){
+ var hdr=document.querySelector('header');
+ function ajustarScroll(){if(hdr)document.documentElement.style.scrollPaddingTop=(hdr.offsetHeight+8)+'px';}
+ ajustarScroll(); window.addEventListener('resize',ajustarScroll);
+ document.addEventListener('click',function(e){
+  var a=e.target.closest&&e.target.closest('[data-motivo],[data-tab]');
+  if(!a)return;
+  if(a.hasAttribute('data-motivo')){var m=document.getElementById('motivo');if(m)m.value=a.getAttribute('data-motivo');}
+  if(a.hasAttribute('data-tab')){var r=document.getElementById(a.getAttribute('data-tab'));if(r)r.checked=true;}
+ });
+ var nav=document.querySelector('nav[aria-label="Principal"]');
+ function finNav(){if(nav)nav.classList.toggle('nav-fin',nav.scrollLeft+nav.clientWidth>=nav.scrollWidth-4);}
+ if(nav){nav.addEventListener('scroll',finNav,{passive:true});window.addEventListener('resize',finNav);finNav();}
+})();
+(function(){
  var VERSION='1.0';
  var dlg=document.getElementById('licencia-material');
  if(!dlg||typeof dlg.showModal!=='function')return;
@@ -949,6 +971,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
    if(window.jspdf&&window.jspdf.jsPDF)return res(window.jspdf);
    var s=document.createElement('script');
    s.src=JSPDF_URL; s.async=true; s.crossOrigin='anonymous';
+   s.integrity='sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk';
    s.onload=function(){window.jspdf&&window.jspdf.jsPDF?res(window.jspdf):rej(new Error('jsPDF'));};
    s.onerror=function(){rej(new Error('jsPDF'));};
    document.head.appendChild(s);
