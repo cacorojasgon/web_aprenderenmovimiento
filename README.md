@@ -1,28 +1,16 @@
-# Aprender en Movimiento
+# Cognición en Movimiento · COGNI-move
 
-Landing page de **Aprender en Movimiento**, una metodología de aprendizaje activo que integra el movimiento físico al proceso educativo.
+Sitio web del programa **Cognición en Movimiento (COGNI-move)**, Universidad Andrés Bello.
 
 ## Estructura
 
 ```
-├── index.html          # Página principal
-├── css/styles.css       # Estilos (paleta e identidad de marca)
-├── js/main.js            # Menú móvil y formulario de contacto
-├── assets/logo.png       # Logo oficial
-└── assets/favicon.png    # Ícono del sitio
+├── index.html     # Sitio completo en un solo archivo (HTML + CSS + JS + imágenes embebidas)
+├── vercel.json    # Cabeceras de seguridad (CSP, HSTS, etc.)
+└── .vercelignore  # Archivos que no se despliegan
 ```
 
-## Paleta de marca
-
-| Color | Hex |
-|---|---|
-| Azul marino | `#1B3A6B` |
-| Naranja | `#FF6B35` |
-| Verde / Teal | `#06A77D` |
-
 ## Uso local
-
-Abre `index.html` directamente en el navegador, o sirve la carpeta con cualquier servidor estático:
 
 ```bash
 npx serve .
@@ -30,17 +18,12 @@ npx serve .
 
 ## Deploy en Vercel
 
-Sitio 100% estático (sin build). Para desplegarlo:
+Sitio 100% estático (sin build). Importa el repositorio en [vercel.com/new](https://vercel.com/new) con Framework Preset **Other**.
 
-1. En [vercel.com/new](https://vercel.com/new), importa el repositorio `web_aprenderenmovimiento`.
-2. Framework Preset: **Other** (Vercel lo detecta automáticamente, no requiere build command ni output directory).
-3. Deploy.
+## Importante al editar `index.html`
 
-También puedes desplegar con la CLI:
+La CSP de `vercel.json` autoriza el único `<script>` inline por su hash SHA-256. Si modificas ese script, hay que recalcular el hash y actualizar `script-src` en `vercel.json`; de lo contrario el navegador lo bloqueará (la descarga con licencia dejaría de funcionar).
 
 ```bash
-npm i -g vercel
-vercel --prod
+node -e "const h=require('fs').readFileSync('index.html','utf8');const s=h.match(/<script>([\s\S]*?)<\/script>/)[1];console.log('sha256-'+require('crypto').createHash('sha256').update(s,'utf8').digest('base64'))"
 ```
-
-`vercel.json` define cache-control para `assets/`, `css/` y `js/`, y `.vercelignore` excluye los archivos fuente de marca en `assets/brand/` que no se usan en el sitio.
