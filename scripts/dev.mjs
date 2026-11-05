@@ -40,7 +40,8 @@ if (process.env.DEV_MOCK) {
     if (String(url).startsWith('https://api.resend.com/')) {
       const correo = JSON.parse(opts.body);
       correos.push(correo);
-      console.log(`\n[correo simulado] Para: ${correo.to} · Responder a: ${correo.reply_to}\nAsunto: ${correo.subject}\n${correo.text}`);
+      const adjuntos = (correo.attachments || []).map((a) => `${a.filename} (${Math.round((a.content.length * 3) / 4 / 1024)} KB)`).join(', ');
+      console.log(`\n[correo simulado] Para: ${correo.to} · Responder a: ${correo.reply_to || '—'}${adjuntos ? ` · Adjuntos: ${adjuntos}` : ''}\nAsunto: ${correo.subject}\n${correo.text}`);
       return new Response(JSON.stringify({ id: 'dev-' + correos.length }), { status: 200 });
     }
     return fetchReal(url, opts);
@@ -51,6 +52,8 @@ function kvComando([cmd, clave, ...args]) {
   switch (cmd.toUpperCase()) {
     case 'INCR': kv.set(clave, (+kv.get(clave) || 0) + 1); return kv.get(clave);
     case 'EXPIRE': return 1;
+    case 'SET': kv.set(clave, args[0]); return 'OK';
+    case 'GET': return kv.has(clave) ? kv.get(clave) : null;
     case 'LPUSH': { const l = kv.get(clave) || []; l.unshift(...args); kv.set(clave, l); return l.length; }
     case 'LRANGE': { const l = kv.get(clave) || []; const fin = +args[1] < 0 ? l.length + +args[1] + 1 : +args[1] + 1; return l.slice(+args[0], fin); }
     default: throw new Error('comando no simulado: ' + cmd);

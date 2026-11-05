@@ -47,6 +47,9 @@ p { margin: 0; }
 .btn:hover { border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn-pri { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn-mini { font: inherit; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn-mini:hover { border-color: var(--accent); }
+.btn-mini:disabled { opacity: .5; cursor: default; }
 :focus-visible { outline: 3px solid #E8692E; outline-offset: 2px; }
 
 /* Login */

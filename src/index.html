@@ -662,7 +662,7 @@ html{scroll-padding-top:140px}
 
 </div>
 
-<!-- ===== Licencia de uso del material descargable · v1.1 ===== -->
+<!-- ===== Licencia de uso del material descargable · v1.2 ===== -->
 <style>
 html:has(.lic-dialog[open]){overflow:hidden}
 .lic-dialog{width:min(880px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:0;border-radius:20px;box-shadow:0 24px 64px rgba(12,22,48,.35);color:#14213D;background:#FFFFFF;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;font-size:17px;line-height:1.6;overflow:hidden}
@@ -695,13 +695,21 @@ html:has(.lic-dialog[open]){overflow:hidden}
 .lic-tabla dt,.lic-tabla dd{margin:0;padding:10px 12px;border-bottom:1px solid #E1E6F2}
 .lic-tabla dt{font-weight:700;color:#14213D;background:#F7F9FD}
 .lic-pie{padding:16px 24px 20px;border-top:1px solid #E1E6F2;background:#F2F5FC}
-.lic-correo{margin:0 0 14px}
+.lic-campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 16px}
+.lic-correo{margin:0 0 8px}
+.lic-firmada-titulo{margin:0 0 4px;font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;color:#0F7C6E}
+.lic-firmada-detalle{margin:0;font-size:15px;color:#3B4763}
+.lic-cc{margin:14px 0 4px;padding:14px 16px;border-radius:12px;background:#F2F5FC;border-left:4px solid #2346C8;font-size:15.5px;color:#3B4763}
+.lic-cc h3{margin:0 0 6px;font-family:'Bricolage Grotesque',sans-serif;font-size:17px;color:#14213D}
+.lic-cc p{margin:0 0 6px}
+.lic-cc ul{margin:0 0 6px;padding-left:20px}
+.lic-cc li+li{margin-top:4px}
 .lic-correo label{display:block;margin:0 0 6px;font-size:15.5px;font-weight:700;color:#14213D}
 .lic-req{font-weight:400;color:#5A6683}
 .lic-correo input{box-sizing:border-box;width:100%;max-width:420px;padding:10px 12px;border:2px solid #D5DCEC;border-radius:10px;background:#FFFFFF;color:#14213D;font:inherit;font-size:16px}
 .lic-correo input:focus{border-color:#2346C8;outline:none;box-shadow:0 0 0 3px rgba(35,70,200,.18)}
 .lic-correo input:not(:placeholder-shown):invalid{border-color:#C2541C}
-.lic-ayuda{margin:6px 0 0;font-size:14px;color:#5A6683}
+.lic-ayuda{margin:2px 0 12px;font-size:14px;color:#5A6683}
 .lic-estado{margin:10px 0 0;font-size:15px;font-weight:700}
 .lic-estado:empty{display:none}
 .lic-estado.ok{color:#0F7C6E}
@@ -780,11 +788,20 @@ html:has(.lic-dialog[open]){overflow:hidden}
    </section>
   </div>
   <p class="lic-nota">Ten presente que el material se entrega tal cual. La seguridad de las actividades y el resguardo de los datos de quienes participan son responsabilidad de quien las aplica.</p>
+  <section class="lic-cc" aria-labelledby="lic-cc-titulo">
+   <h3 id="lic-cc-titulo">Relación con Creative Commons</h3>
+   <p>Esta es una licencia propia de la Universidad Andrés Bello, no una licencia Creative Commons. Como referencia, comparte con ellas dos de sus elementos:</p>
+   <ul>
+    <li><strong>Atribución (BY):</strong> debes mantener la autoría y los créditos del material.</li>
+    <li><strong>No comercial (NC):</strong> solo puedes usarlo sin fines comerciales.</li>
+   </ul>
+   <p>A diferencia de las licencias Creative Commons, no permite publicar ni redistribuir el material o sus adaptaciones fuera de tu equipo de trabajo.</p>
+  </section>
   <p class="lic-aviso">Este resumen facilita la lectura y no reemplaza el texto de la licencia, que se presenta a continuación.</p>
 
   <article class="lic-texto" data-lic-texto>
    <h2>Licencia de uso del material descargable del programa Cognición en Movimiento</h2>
-   <p class="lic-sub">Licencia de usuario final sobre obra protegida por derecho de autor (Ley N° 17.336) · Universidad Andrés Bello · Versión 1.1, octubre de 2026</p>
+   <p class="lic-sub">Licencia de usuario final sobre obra protegida por derecho de autor (Ley N° 17.336) · Universidad Andrés Bello · Versión 1.2, noviembre de 2026</p>
 
    <h3>Título uno. Condiciones particulares</h3>
    <dl class="lic-tabla">
@@ -800,6 +817,8 @@ html:has(.lic-dialog[open]){overflow:hidden}
     <dd>Descarga digital desde el sitio web del programa, para su almacenamiento, lectura, impresión y edición en los dispositivos de la Persona Usuaria.</dd>
     <dt>Tipo de licencia</dt>
     <dd>Licencia de usuario final no exclusiva, intransferible, no sublicenciable y gratuita. Constituye una autorización de uso en los términos del artículo 20 de la Ley N° 17.336 y no importa cesión de derechos patrimoniales ni morales.</dd>
+    <dt>Referencia Creative Commons</dt>
+    <dd>Esta licencia no es una licencia Creative Commons ni se rige por sus términos. Como referencia, los permisos que otorga coinciden con los elementos Atribución (BY) y No Comercial (NC) de dichas licencias, con dos diferencias: no autoriza compartir el Material ni sus Adaptaciones fuera del Equipo Autorizado, y puede terminar conforme a la Cláusula Décima Primera. Ante cualquier diferencia, prevalece el texto de esta licencia.</dd>
     <dt>Finalidad autorizada</dt>
     <dd>Uso educativo, pedagógico, deportivo, formativo o de investigación, sin fines comerciales, en la práctica profesional de la Persona Usuaria o en la institución en que se desempeña, tal como establecimientos educacionales, jardines infantiles, talleres y clubes deportivos u otras instituciones análogas.</dd>
     <dt>Territorio</dt>
@@ -897,7 +916,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
    <p>Terminada la licencia, la Persona Usuaria cesará todo uso del Material y eliminará las copias digitales e impresas bajo su control. Podrá conservar su Contenido Propio y los registros generados en actividades ya realizadas, por el plazo y para los fines que exija la normativa aplicable. Sobrevivirán las cláusulas de propiedad intelectual y derechos morales, atribución, limitación de responsabilidad, indemnidad, protección de datos personales, y ley aplicable, domicilio y jurisdicción.</p>
 
    <h4>Cláusula Décima Segunda. Protección de datos personales</h4>
-   <p>La Universidad, como responsable del tratamiento, tratará únicamente los Datos Personales que el sitio web registre para dejar constancia de la aceptación, esto es, la fecha y hora, la versión de la licencia, el recurso descargado, la dirección de correo electrónico que indique al descargar, que se solicita solo con fines de registro interno de la aceptación y no se utilizará para envíos promocionales, y un identificador técnico de la sesión, y aquellos que la Persona Usuaria entregue voluntariamente a través del formulario de contacto. Estos datos se utilizarán exclusivamente para gestionar la licencia y acreditar su aceptación, elaborar estadísticas agregadas de uso del Material, responder las solicitudes que la Persona Usuaria formule y cumplir obligaciones legales. Cualquier otra finalidad requerirá su consentimiento separado. No se comunicarán a terceros, salvo obligación legal o proveedores tecnológicos que actúen por encargo de la Universidad con resguardos equivalentes.</p>
+   <p>La Universidad, como responsable del tratamiento, tratará únicamente los Datos Personales que el sitio web registre para dejar constancia de la aceptación, esto es, el nombre y la dirección de correo electrónico que indique al descargar, la fecha y hora, la versión de la licencia, el recurso descargado y un identificador técnico de la sesión, y aquellos que la Persona Usuaria entregue voluntariamente a través del formulario de contacto. El nombre y el correo electrónico se solicitan solo con fines de registro interno de la aceptación y para emitir la copia firmada de la licencia, y no se utilizarán para envíos promocionales. Estos datos se utilizarán exclusivamente para gestionar la licencia y acreditar su aceptación, enviar la copia firmada de la licencia cuando la Persona Usuaria lo solicite, elaborar estadísticas agregadas de uso del Material, responder las solicitudes que la Persona Usuaria formule y cumplir obligaciones legales. Cualquier otra finalidad requerirá su consentimiento separado. No se comunicarán a terceros, salvo obligación legal o proveedores tecnológicos que actúen por encargo de la Universidad con resguardos equivalentes.</p>
    <p>La Persona Usuaria podrá ejercer sus derechos de acceso, rectificación, supresión, oposición y los demás que reconozca la normativa vigente, a través del canal de comunicaciones indicado en el Título Uno.</p>
    <p>Cuando la Persona Usuaria utilice el Material para registrar información de los Participantes, ella o la institución en que se desempeña actuará como responsable de dicho tratamiento, y deberá asegurar una base de licitud, informar a los titulares, contar con la autorización de padres, madres o representantes legales cuando se trate de niñas, niños y adolescentes, resguardar su interés superior, limitar los datos a lo estrictamente necesario y adoptar medidas de seguridad adecuadas. La Universidad no accede a esa información ni actúa como responsable ni como encargada de su tratamiento, salvo convenio separado y expreso, como ocurre en los proyectos de investigación sujetos a consentimiento informado y a evaluación ético-científica. La Persona Usuaria no enviará datos de los Participantes al equipo del programa sin una base legal y un acuerdo previo.</p>
    <p>Las Partes se obligan a cumplir la Ley N° 19.628 sobre Protección de la Vida Privada y, desde su entrada en vigencia, la Ley N° 21.719 sobre Protección y Tratamiento de los Datos Personales, junto con la demás normativa aplicable.</p>
@@ -907,8 +926,8 @@ html:has(.lic-dialog[open]){overflow:hidden}
    <p>Para todos los efectos de esta licencia, las Partes fijan su domicilio en la comuna y ciudad de Santiago y se someten a la competencia de sus tribunales ordinarios de justicia, sin perjuicio de los derechos irrenunciables que la Ley N° 19.496 sobre Protección de los Derechos de los Consumidores reconozca a la Persona Usuaria, cuando resulte aplicable.</p>
 
    <h4>Cláusula Décima Cuarta. Aceptación digital y constancia</h4>
-   <p>Esta licencia es ofrecida por la Universidad y se perfecciona cuando la Persona Usuaria indica su correo electrónico, marca la casilla de aceptación y presiona el botón “Aceptar y descargar”. La aceptación digital tendrá pleno valor conforme a la Ley N° 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación de dicha Firma. Al aceptar, la Persona Usuaria declara ser mayor de edad y haber leído y comprendido la totalidad de estos términos.</p>
-   <p>La constancia de la aceptación quedará asociada a la versión de la licencia vigente al momento de cada descarga y al correo electrónico indicado. La Persona Usuaria puede guardar una copia de este texto en formato PDF desde la misma ventana de descarga.</p>
+   <p>Esta licencia es ofrecida por la Universidad y se perfecciona cuando la Persona Usuaria indica su nombre completo y su correo electrónico, marca la casilla de aceptación y presiona el botón “Firmar y descargar”. Estos actos constituyen su firma electrónica, que tendrá pleno valor conforme a la Ley N° 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación de dicha Firma. Al aceptar, la Persona Usuaria declara ser mayor de edad y haber leído y comprendido la totalidad de estos términos.</p>
+   <p>La constancia de la aceptación quedará asociada a la versión de la licencia vigente al momento de cada descarga, al nombre y al correo electrónico indicados, y a la fecha y hora del servidor del sitio web. Una vez firmada, la Persona Usuaria podrá descargar una copia de la licencia con su nombre, la fecha y hora de la firma y un código de verificación, o solicitar su envío al correo electrónico indicado. La Universidad conservará una copia de igual contenido.</p>
 
    <h4>Cláusula Décima Quinta. Disposiciones generales</h4>
    <ul>
@@ -924,16 +943,33 @@ html:has(.lic-dialog[open]){overflow:hidden}
  </div>
 
  <footer class="lic-pie">
-  <div class="lic-correo">
-   <label for="licencia-correo">Correo electrónico <span class="lic-req">(obligatorio)</span></label>
-   <input type="email" id="licencia-correo" autocomplete="email" inputmode="email" maxlength="254" required placeholder="nombre@institucion.cl" aria-describedby="licencia-correo-ayuda">
-   <p id="licencia-correo-ayuda" class="lic-ayuda">Lo solicitamos solo con fines de registro interno, como constancia de tu aceptación de la licencia. No lo usaremos para enviarte publicidad ni lo compartiremos con terceros.</p>
+  <div id="licencia-form">
+   <div class="lic-campos">
+    <div class="lic-correo">
+     <label for="licencia-nombre">Nombre completo <span class="lic-req">(obligatorio)</span></label>
+     <input type="text" id="licencia-nombre" autocomplete="name" maxlength="100" required placeholder="Nombre y apellido" aria-describedby="licencia-datos-ayuda">
+    </div>
+    <div class="lic-correo">
+     <label for="licencia-correo">Correo electrónico <span class="lic-req">(obligatorio)</span></label>
+     <input type="email" id="licencia-correo" autocomplete="email" inputmode="email" maxlength="254" required placeholder="nombre@institucion.cl" aria-describedby="licencia-datos-ayuda">
+    </div>
+   </div>
+   <p id="licencia-datos-ayuda" class="lic-ayuda">Tu nombre y correo se solicitan solo con fines de registro interno y para emitir tu copia firmada de la licencia. No los usaremos para enviarte publicidad ni los compartiremos con terceros.</p>
+   <label class="lic-check"><input type="checkbox" id="licencia-acepto"> <span>Declaro ser mayor de edad, haber leído la Licencia de uso del material (versión 1.2), aceptar sus términos, incluida la cláusula de protección de datos personales, y firmarla electrónicamente con mi nombre.</span></label>
+   <div class="lic-acciones">
+    <button type="button" class="lic-btn lic-btn-pri" id="licencia-descargar" disabled>Firmar y descargar</button>
+    <button type="button" class="lic-btn lic-btn-sec" data-lic-cerrar>Cancelar</button>
+    <button type="button" class="lic-copia" id="licencia-copia">Guardar el texto de la licencia (PDF)</button>
+   </div>
   </div>
-  <label class="lic-check"><input type="checkbox" id="licencia-acepto"> <span>Declaro ser mayor de edad, haber leído la Licencia de uso del material (versión 1.1) y aceptar sus términos, incluida la cláusula de protección de datos personales.</span></label>
-  <div class="lic-acciones">
-   <button type="button" class="lic-btn lic-btn-pri" id="licencia-descargar" disabled>↓ Aceptar y descargar</button>
-   <button type="button" class="lic-btn lic-btn-sec" data-lic-cerrar>Cancelar</button>
-   <button type="button" class="lic-copia" id="licencia-copia">Guardar una copia de la licencia (PDF)</button>
+  <div id="licencia-firmada" class="lic-firmada" hidden>
+   <p class="lic-firmada-titulo">✓ Licencia firmada y descarga iniciada</p>
+   <p id="licencia-firmada-detalle" class="lic-firmada-detalle"></p>
+   <div class="lic-acciones">
+    <button type="button" class="lic-btn lic-btn-pri" id="licencia-pdf">↓ Descargar licencia firmada (PDF)</button>
+    <button type="button" class="lic-btn lic-btn-sec" id="licencia-enviar">Enviar copia a mi correo</button>
+    <button type="button" class="lic-btn lic-btn-sec" data-lic-cerrar>Cerrar</button>
+   </div>
   </div>
   <p id="licencia-estado" class="lic-estado" role="status" aria-live="polite"></p>
  </footer>
@@ -973,23 +1009,32 @@ html:has(.lic-dialog[open]){overflow:hidden}
  }
 })();
 (function(){
- var VERSION='1.1';
+ var VERSION='1.2';
  var dlg=document.getElementById('licencia-material');
  if(!dlg||typeof dlg.showModal!=='function')return;
  var chk=document.getElementById('licencia-acepto');
+ var nombre=document.getElementById('licencia-nombre');
  var correo=document.getElementById('licencia-correo');
  var btn=document.getElementById('licencia-descargar');
  var est=document.getElementById('licencia-estado');
+ var form=document.getElementById('licencia-form');
+ var firmada=document.getElementById('licencia-firmada');
+ var bPdf=document.getElementById('licencia-pdf');
+ var bEnviar=document.getElementById('licencia-enviar');
  var cuerpo=dlg.querySelector('.lic-cuerpo');
- var actual=null, enCurso=false;
+ var actual=null, enCurso=false, firma=null;
+ var NOMBRE_RE=/^\p{L}[\p{L}\p{M} .'’-]*$/u;
 
- /* Registro (cláusulas 12 y 14): el servidor guarda fecha, versión, recurso, correo e identificador técnico de sesión */
+ /* Registro y firma (cláusulas 12 y 14): el servidor guarda nombre, correo, fecha y hora, versión, recurso e identificador técnico de sesión */
  function uuid(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();var b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=b[6]&15|64;b[8]=b[8]&63|128;var x=[].map.call(b,function(n){return(n+256).toString(16).slice(1)}).join('');return x.slice(0,8)+'-'+x.slice(8,12)+'-'+x.slice(12,16)+'-'+x.slice(16,20)+'-'+x.slice(20);}
  function sesion(){try{var v=sessionStorage.getItem('cm_sesion');if(!v){v=uuid();sessionStorage.setItem('cm_sesion',v);}return v;}catch(_){return uuid();}}
  function registrar(evento){try{fetch('/api/registro',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({evento:evento,recurso:actual?actual.recurso:'',version:VERSION,origen:actual?actual.seccion:'otro',sesion:sesion()})}).catch(function(){});}catch(_){}}
 
  function estado(txt,ok){est.textContent=txt||'';est.className='lic-estado'+(txt?(ok?' ok':' error'):'');}
- function actualizarBoton(){btn.disabled=enCurso||!chk.checked||!correo.value.trim()||!correo.checkValidity();}
+ function nombreLimpio(){return nombre.value.replace(/\s+/g,' ').trim();}
+ function nombreValido(){var v=nombreLimpio();return v.length>=3&&v.length<=100&&NOMBRE_RE.test(v);}
+ function actualizarBoton(){btn.disabled=enCurso||!chk.checked||!nombreValido()||!correo.value.trim()||!correo.checkValidity();}
+ function mostrarFirmada(si){form.hidden=si; firmada.hidden=!si;}
 
  function abrir(origen){
   var p=origen.closest('.ap-panel'), m=p&&p.className.match(/ap-panel-(inf|esc|adu)/);
@@ -1001,6 +1046,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
   };
   dlg.querySelector('[data-lic-recurso]').textContent=actual.recurso;
   dlg.querySelector('[data-lic-formato]').textContent=actual.formato;
+  firma=null; mostrarFirmada(false); bEnviar.disabled=false;
   chk.checked=false; estado(''); actualizarBoton();
   dlg.showModal(); cuerpo.scrollTop=0; dlg.scrollTop=0;
  }
@@ -1009,37 +1055,66 @@ html:has(.lic-dialog[open]){overflow:hidden}
   a.addEventListener('click',function(e){e.preventDefault();abrir(a);});
  });
  chk.addEventListener('change',actualizarBoton);
+ nombre.addEventListener('input',function(){nombre.setCustomValidity('');actualizarBoton();});
  correo.addEventListener('input',actualizarBoton);
 
- function guardar(blob,nombre){
+ function guardar(blob,nombreArchivo){
   var u=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=u; a.download=nombre; a.rel='noopener';
+  a.href=u; a.download=nombreArchivo; a.rel='noopener';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){URL.revokeObjectURL(u);},2000);
  }
+ function archivoDe(r,defecto){var n=(r.headers.get('content-disposition')||'').match(/filename="([^"]+)"/);return n?n[1]:defecto;}
 
  function fallo(msg){var e=new Error(msg);e.paraUsuario=true;return e;}
+ function errorDe(r,defecto){return r.json().catch(function(){return{};}).then(function(j){throw fallo(j.error||defecto);});}
+ function mostrarError(e){estado(e&&e.paraUsuario?e.message:'No pudimos conectar con el sitio. Revisa tu conexión e inténtalo nuevamente.',false);}
+ function fechaChile(iso){try{return new Date(iso).toLocaleString('es-CL',{timeZone:'America/Santiago',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}catch(_){return iso;}}
 
  btn.addEventListener('click',function(){
   if(enCurso||!actual)return;
+  if(!nombreValido()){nombre.setCustomValidity('Escribe tu nombre completo, solo con letras.');nombre.reportValidity();return;}
   if(!correo.checkValidity()){correo.reportValidity();return;}
   if(!chk.checked)return;
   enCurso=true; actualizarBoton();
-  var et=btn.textContent; btn.textContent='Preparando descarga…'; estado('');
+  var et=btn.textContent; btn.textContent='Firmando…'; estado('');
   fetch('/api/descarga',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-   recurso:actual.recurso, version:VERSION, email:correo.value.trim(), acepta:true, origen:actual.seccion, sesion:sesion()
+   recurso:actual.recurso, version:VERSION, nombre:nombreLimpio(), email:correo.value.trim(), acepta:true, origen:actual.seccion, sesion:sesion()
   })})
    .then(function(r){
-    if(!r.ok)return r.json().catch(function(){return{};}).then(function(j){throw fallo(j.error||'No pudimos preparar la descarga. Inténtalo nuevamente en unos minutos.');});
+    if(!r.ok)return errorDe(r,'No pudimos preparar la descarga. Inténtalo nuevamente en unos minutos.');
     return r.blob().then(function(b){
-     var n=(r.headers.get('content-disposition')||'').match(/filename="([^"]+)"/);
-     guardar(b,n?n[1]:'material-cognicion-en-movimiento');
-     estado('Listo. La descarga comenzó; revisa la carpeta de descargas de tu navegador.',true);
-     setTimeout(function(){if(dlg.open)dlg.close();},1500);
+     guardar(b,archivoDe(r,'material-cognicion-en-movimiento'));
+     firma={id:r.headers.get('x-licencia-id'),token:r.headers.get('x-licencia-token')};
+     var cod=r.headers.get('x-licencia-codigo')||'', fecha=r.headers.get('x-licencia-fecha');
+     document.getElementById('licencia-firmada-detalle').textContent='Firmada por '+nombreLimpio()+' el '+fechaChile(fecha)+' (hora de Chile). Código de verificación: '+cod+'. Guarda tu copia o recíbela por correo.';
+     mostrarFirmada(true); bPdf.focus();
     });
    })
-   .catch(function(e){estado(e&&e.paraUsuario?e.message:'No pudimos conectar con el sitio. Revisa tu conexión e inténtalo nuevamente.',false);})
+   .catch(mostrarError)
    .then(function(){enCurso=false; btn.textContent=et; actualizarBoton();});
+ });
+
+ function pedir(url,boton,ocupado,fin){
+  if(!firma||boton.disabled)return;
+  var et=boton.textContent; boton.disabled=true; boton.textContent=ocupado; estado('');
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(firma)})
+   .then(fin).catch(mostrarError)
+   .then(function(r){boton.textContent=et; if(r!=='enviado')boton.disabled=false;});
+ }
+ bPdf.addEventListener('click',function(){
+  pedir('/api/licencia',bPdf,'Preparando PDF…',function(r){
+   if(!r.ok)return errorDe(r,'No pudimos generar la licencia firmada. Inténtalo nuevamente.');
+   return r.blob().then(function(b){guardar(b,archivoDe(r,'Licencia_firmada_COGNI-move.pdf'));});
+  });
+ });
+ bEnviar.addEventListener('click',function(){
+  pedir('/api/licencia-correo',bEnviar,'Enviando…',function(r){
+   return r.json().catch(function(){return{};}).then(function(j){
+    if(!r.ok)throw fallo(j.error||'No pudimos enviar el correo. Inténtalo nuevamente en unos minutos.');
+    estado(j.mensaje||'Te enviamos una copia de la licencia firmada.',true); return 'enviado';
+   });
+  });
  });
 
  dlg.querySelectorAll('[data-lic-cerrar]').forEach(function(b){b.addEventListener('click',function(){dlg.close();});});
@@ -1101,7 +1176,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
   var rec=actual?(actual.recurso+(actual.formato?' · '+actual.formato:'')):'Material del programa';
   var nota=['Copia del texto de la licencia generada el '+fecha+', a las '+hora+' h, desde el sitio web del programa.',
             'Recurso: '+rec+'.',
-            'La aceptación se registra en el sitio web al presionar el botón “Aceptar y descargar”, junto con el correo electrónico indicado.'];
+            'Copia sin firmar, solo para lectura. La copia firmada, con tu nombre y la fecha y hora de la firma, se emite al presionar “Firmar y descargar”.'];
   fuente(8.5,false);
   var nl=[]; nota.forEach(function(t){nl=nl.concat(doc.splitTextToSize(t,CW-10));});
   var bh=nl.length*lh(8.5)+7;
@@ -1162,7 +1237,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
    doc.setPage(p);
    doc.setDrawColor(C.linea[0],C.linea[1],C.linea[2]); doc.setLineWidth(0.3); doc.line(ML,H-15,W-MR,H-15);
    fuente(7.5,false); col(C.gris);
-   doc.text('Versión '+VERSION+' · octubre de 2026 · Obra protegida por la Ley N° 17.336',ML,H-10);
+   doc.text('Versión '+VERSION+' · noviembre de 2026 · Obra protegida por la Ley N° 17.336',ML,H-10);
    doc.text('Página '+p+' de '+n,W-MR,H-10,{align:'right'});
   }
   doc.setProperties({title:'Licencia de uso del material descargable · Cognición en Movimiento',subject:'Licencia de usuario final, versión '+VERSION,author:'Universidad Andrés Bello',creator:'Sitio web Cognición en Movimiento'});

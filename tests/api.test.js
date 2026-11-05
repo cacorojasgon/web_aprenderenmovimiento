@@ -1,10 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { validarContacto, armarCorreo } from '../api/contacto.js';
 import { validarRegistro } from '../api/registro.js';
-import { validarDescarga, POST } from '../api/descarga.js';
+import { validarDescarga, firmarRegistro, POST } from '../api/descarga.js';
+import { sello, codigoVerificacion, tokenLicencia, tokenValido } from '../api/_lib/firma.js';
+import { LICENCIAS } from '../api/_lib/licencias/index.js';
+import { pdfDe } from '../api/_lib/licencia-firmada.js';
+import { armarCorreoLicencia } from '../api/licencia-correo.js';
+import { POST as postLicencia } from '../api/licencia.js';
 import { RECURSOS, VERSION_VIGENTE } from '../api/_lib/catalogo.js';
 import { hashPassword, verificarCredenciales, cookieSesion, sesionValida } from '../api/_lib/auth.js';
 
@@ -61,11 +66,11 @@ test('registro: una descarga no puede registrarse sin pasar por /api/descarga', 
   assert.equal(validarRegistro({ evento: 'descarga', recurso: RECURSO, version: VERSION_VIGENTE, sesion }), null);
 });
 
-const pedido = { recurso: RECURSO, version: VERSION_VIGENTE, email: ' Ana.Perez@Colegio.cl ', acepta: true, origen: 'esc', sesion };
-test('descarga: exige licencia vigente aceptada y correo, y registra el correo normalizado', () => {
+const pedido = { recurso: RECURSO, version: VERSION_VIGENTE, nombre: '  María José   Ñúñez-O’Higgins ', email: ' Ana.Perez@Colegio.cl ', acepta: true, origen: 'esc', sesion };
+test('descarga: exige licencia vigente aceptada, nombre y correo, y los registra normalizados', () => {
   const { evento, recurso } = validarDescarga(pedido);
   assert.equal(recurso.archivo, 'plantilla-ficha-aula.docx');
-  assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl' });
+  assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl', n: 'María José Ñúñez-O’Higgins' });
   assert.ok(validarDescarga({ ...pedido, acepta: 'true' }).error);
   assert.ok(validarDescarga({ ...pedido, acepta: undefined }).error);
   assert.ok(validarDescarga({ ...pedido, version: '1.0' }).error);
@@ -75,6 +80,74 @@ test('descarga: exige licencia vigente aceptada y correo, y registra el correo n
   assert.ok(validarDescarga({ ...pedido, email: ['a@b.cl'] }).error);
   assert.ok(validarDescarga({ ...pedido, recurso: '__proto__' }).error);
   assert.ok(validarDescarga({ ...pedido, sesion: 'abc' }).error);
+});
+
+test('descarga: el nombre es obligatorio, acotado y solo admite letras y signos de nombres', () => {
+  for (const nombre of [undefined, '', 'Al', 'x'.repeat(101), 'Ana <b>', 'Ana\r\nBcc: x', '123 Pérez', ['Ana Pérez'], '-Ana']) {
+    assert.ok(validarDescarga({ ...pedido, nombre }).error, String(nombre));
+  }
+  assert.equal(validarDescarga({ ...pedido, nombre: "D'Angelo Müller" }).evento.n, "D'Angelo Müller");
+});
+
+// ---------- Licencia firmada ----------
+function registroFirmado() {
+  process.env.SESSION_SECRET = 'secreto-de-prueba-'.repeat(3);
+  return firmarRegistro(validarDescarga(pedido).evento, new Date('2026-11-02T18:42:10.123Z'));
+}
+
+test('licencia: el texto guardado de cada versión coincide con su huella SHA-256', () => {
+  assert.ok(LICENCIAS[VERSION_VIGENTE], 'falta el texto de la versión vigente');
+  for (const [v, l] of Object.entries(LICENCIAS)) {
+    assert.equal(l.VERSION, v);
+    assert.equal(createHash('sha256').update(l.HTML).digest('hex'), l.SHA256);
+  }
+});
+
+test('licencia: el registro firmado lleva hora del servidor, huella del texto y sello verificable', () => {
+  const reg = registroFirmado();
+  assert.match(reg.id, /^[0-9a-f-]{36}$/);
+  assert.equal(reg.t, '2026-11-02T18:42:10.123Z');
+  assert.equal(reg.h, LICENCIAS[VERSION_VIGENTE].SHA256);
+  assert.equal(reg.f, sello(reg));
+  assert.notEqual(sello({ ...reg, n: 'Otra Persona' }), reg.f);
+  assert.notEqual(sello({ ...reg, t: '2026-11-02T18:42:11.123Z' }), reg.f);
+  assert.match(codigoVerificacion(reg.f), /^[0-9A-F]{4}(-[0-9A-F]{4}){4}$/);
+});
+
+test('licencia: el token de acceso vence a las 24 horas y no sirve para otro registro', () => {
+  const reg = registroFirmado(), ahora = Date.now();
+  const token = tokenLicencia(reg.id, ahora);
+  assert.equal(tokenValido(reg.id, token, ahora), true);
+  assert.equal(tokenValido(reg.id, token, ahora + 25 * 3600e3), false);
+  assert.equal(tokenValido('00000000-0000-4000-8000-000000000000', token, ahora), false);
+  const [exp, mac] = token.split('.');
+  assert.equal(tokenValido(reg.id, `${+exp + 1e9}.${mac}`, ahora), false);
+  assert.equal(tokenValido(reg.id, `${exp}.x${mac}`, ahora), false);
+  for (const t of [undefined, '', 'abc', {}, exp]) assert.equal(tokenValido(reg.id, t, ahora), false);
+});
+
+test('licencia: /api/licencia rechaza un token inválido sin consultar el almacenamiento', async () => {
+  const reg = registroFirmado();
+  const r = await postLicencia(new Request('https://sitio.cl/api/licencia', {
+    method: 'POST', headers: { origin: 'https://sitio.cl', host: 'sitio.cl', 'content-type': 'application/json' }, body: JSON.stringify({ id: reg.id, token: 'x.y' }),
+  }));
+  assert.equal(r.status, 403);
+});
+
+test('licencia: el PDF firmado es determinista', async () => {
+  const reg = registroFirmado();
+  const a = Buffer.from(await pdfDe(reg)), b = Buffer.from(await pdfDe(reg));
+  assert.equal(a.subarray(0, 5).toString(), '%PDF-');
+  assert.ok(a.equals(b));
+});
+
+test('licencia: el correo con la copia escapa HTML y lleva código e ID', () => {
+  const reg = { ...registroFirmado(), n: '<img src=x onerror=alert(1)>' };
+  const { asunto, html, text } = armarCorreoLicencia(reg);
+  assert.ok(!html.includes('<img'));
+  assert.ok(!/[\r\n]/.test(asunto));
+  assert.ok(text.includes(codigoVerificacion(reg.f)));
+  assert.ok(text.includes(reg.id));
 });
 
 test('descarga: cada recurso del catálogo tiene su archivo en recursos/', async () => {

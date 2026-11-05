@@ -13,7 +13,8 @@ import { readFile, writeFile, mkdir, rm, copyFile, readdir } from 'node:fs/promi
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
-import { RECURSOS, MOTIVOS, PAISES } from '../api/_lib/catalogo.js';
+import { pathToFileURL } from 'node:url';
+import { RECURSOS, MOTIVOS, PAISES, VERSION_VIGENTE } from '../api/_lib/catalogo.js';
 
 const RAIZ = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(RAIZ, 'src');
@@ -73,10 +74,60 @@ async function validarCatalogo(html) {
   if (/\son[a-z]+\s*=\s*["']/i.test(html)) errores.push('Hay manejadores de eventos inline (onclick=...): la CSP los bloquea');
 }
 
-// ---------- 2a. Descargables embebidos (versión offline) -> recursos/ ----------
+// ---------- 2a. Texto de la licencia -> api/_lib/licencias/ ----------
+// Cada versión guarda el texto exacto que se firma (y su huella SHA-256), con el que el servidor emite
+// las copias firmadas. Un texto ya publicado no se puede cambiar: hay que subir la versión.
+const enVercel = Boolean(process.env.VERCEL || process.env.CI);
+const DIR_LICENCIAS = path.join(RAIZ, 'api', '_lib', 'licencias');
+
+async function sincronizarArchivo(ruta, contenido, descripcion) {
+  const actual = await readFile(ruta, 'utf8').catch(() => null);
+  if (actual === contenido) return;
+  if (enVercel) { errores.push(`${descripcion} no está al día: corre el build en local y haz commit`); return; }
+  await mkdir(path.dirname(ruta), { recursive: true });
+  await writeFile(ruta, contenido);
+  console.warn(`Aviso: se actualizó ${path.relative(RAIZ, ruta)}. Inclúyelo en el commit.`);
+}
+
+async function sincronizarLicencia(html) {
+  const version = (html.match(/var VERSION='([\d.]+)'/) || [])[1];
+  if (version !== VERSION_VIGENTE) {
+    errores.push(`VERSION de la licencia en src/index.html (${version}) no coincide con la vigente del catálogo (${VERSION_VIGENTE})`);
+    return;
+  }
+  const m = html.match(/<article class="lic-texto" data-lic-texto>([\s\S]*?)<\/article>/);
+  if (!m) { errores.push('No se encontró el texto de la licencia (<article data-lic-texto>)'); return; }
+  const texto = m[1].trim();
+  const ruta = path.join(DIR_LICENCIAS, `v${version}.js`);
+  const existente = await readFile(ruta, 'utf8').catch(() => null);
+  if (existente !== null) {
+    const { HTML } = await import(pathToFileURL(ruta).href);
+    if (HTML !== texto) {
+      errores.push(`El texto de la licencia cambió pero la versión sigue siendo ${version}. Sube la versión en VERSIONES_LICENCIA (catálogo) y en VERSION (src/index.html)`);
+      return;
+    }
+  } else {
+    const sha = createHash('sha256').update(texto).digest('hex');
+    await sincronizarArchivo(ruta,
+      '// Generado por scripts/build.mjs desde src/index.html. No editar: es el texto exacto que firman las\n' +
+      '// personas. Cambiar el texto exige una versión nueva de la licencia.\n' +
+      `export const VERSION = '${version}';\nexport const SHA256 = '${sha}';\nexport const HTML = ${JSON.stringify(texto)};\n`,
+      `api/_lib/licencias/v${version}.js`);
+  }
+  const versiones = (await readdir(DIR_LICENCIAS).catch(() => []))
+    .filter((f) => /^v\d+(\.\d+)*\.js$/.test(f)).map((f) => f.slice(1, -3))
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  const id = (v) => 'v' + v.replace(/\./g, '_');
+  await sincronizarArchivo(path.join(DIR_LICENCIAS, 'index.js'),
+    '// Generado por scripts/build.mjs: versiones de la licencia con texto firmable disponible.\n' +
+    versiones.map((v) => `import * as ${id(v)} from './v${v}.js';\n`).join('') +
+    `\nexport const LICENCIAS = {\n${versiones.map((v) => `  '${v}': ${id(v)},\n`).join('')}};\n`,
+    'api/_lib/licencias/index.js');
+}
+
+// ---------- 2b. Descargables embebidos (versión offline) -> recursos/ ----------
 async function retirarDescargables(html) {
   const re = /<div hidden>\s*<a id="([^"]+)" href="data:[^;]+;base64,([A-Za-z0-9+/=]+)"[^>]*>[^<]*<\/a>\s*<\/div>\n?/g;
-  const enVercel = Boolean(process.env.VERCEL || process.env.CI);
   for (const [, id, b64] of html.matchAll(re)) {
     const recurso = RECURSOS.find((r) => r.ancla === id);
     if (!recurso) { errores.push(`Archivo embebido "${id}" sin recurso en api/_lib/catalogo.js (campo ancla)`); continue; }
@@ -92,7 +143,7 @@ async function retirarDescargables(html) {
   return html.replace(re, '');
 }
 
-// ---------- 2b. Imágenes embebidas ----------
+// ---------- 2c. Imágenes embebidas ----------
 async function extraerRecursos(html) {
   const re = /<(img)\b([^>]*?)\b(src)="data:([a-z0-9/.+-]+);base64,([A-Za-z0-9+/=]+)"([^>]*)>/g;
   const ocurrencias = [...html.matchAll(re)];
@@ -208,6 +259,7 @@ await rm(OUT, { recursive: true, force: true });
 const fuente = await readFile(path.join(SRC, 'index.html'), 'utf8');
 const sinDescargables = await retirarDescargables(fuente);
 await validarCatalogo(fuente);
+await sincronizarLicencia(fuente);
 if (errores.length) {
   console.error('Build detenido:\n- ' + errores.join('\n- '));
   process.exit(1);

@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "sharp": "0.34.3"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.1"
   }
 }

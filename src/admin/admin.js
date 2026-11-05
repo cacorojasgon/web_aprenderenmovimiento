@@ -348,8 +348,44 @@
     if (!filas.length) { var td = tb.insertRow().insertCell(); td.colSpan = columnas.length; td.textContent = 'Sin registros en este período.'; return; }
     filas.forEach(function (f) {
       var tr = tb.insertRow();
-      f.forEach(function (v, i) { var td = tr.insertCell(); td.textContent = v; if (columnas[i].num) td.className = 'num'; if (columnas[i].clase) td.className = columnas[i].clase; });
+      f.forEach(function (v, i) {
+        var td = tr.insertCell();
+        if (v instanceof Node) td.appendChild(v); else td.textContent = v;
+        if (columnas[i].num) td.className = 'num';
+        if (columnas[i].clase) td.className = columnas[i].clase;
+      });
     });
+  }
+
+  // ---------- Licencias firmadas ----------
+  // Solo las descargas desde la versión 1.2 tienen copia firmada (nombre + sello del servidor).
+  function firmada(e) { return e.e === 'descarga' && e.id && e.f && e.n; }
+  function codigo(e) { return e.f.slice(0, 20).toUpperCase().match(/.{4}/g).join('-'); }
+  function guardar(blob, nombre) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = nombre;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function botonLicencia(e) {
+    if (!firmada(e)) return '—';
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn-mini'; b.textContent = 'PDF';
+    b.title = 'Código de verificación ' + codigo(e);
+    b.setAttribute('aria-label', 'Descargar la licencia firmada por ' + e.n + ' (' + fechaHora(e.t) + ')');
+    b.addEventListener('click', function () {
+      b.disabled = true; b.textContent = '…';
+      fetch('/api/admin/licencia?id=' + encodeURIComponent(e.id), { credentials: 'same-origin' })
+        .then(function (r) {
+          if (r.status === 401) { mostrar('login'); return null; }
+          if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.error || 'No se pudo obtener la licencia.'); });
+          return r.blob();
+        })
+        .then(function (blob) { if (blob) guardar(blob, 'Licencia_firmada_COGNI-move_' + e.id.slice(0, 8) + '.pdf'); b.textContent = 'PDF'; })
+        .catch(function (err) { b.textContent = 'Error'; b.title = err.message || 'No hay conexión con el servidor.'; })
+        .then(function () { b.disabled = false; });
+    });
+    return b;
   }
 
   function nombreRecurso(id) { var r = datos.recursos.find(function (x) { return x.id === id; }); return r ? r.nombre : id; }
@@ -358,10 +394,11 @@
     var m = new Map();
     calc.enRango.forEach(function (e) {
       if (e.e !== 'descarga' || !e.m) return;
-      var x = m.get(e.m) || { correo: e.m, n: 0, primera: e.t, ultima: e.t, recursos: new Set() };
+      var x = m.get(e.m) || { correo: e.m, nombre: '', n: 0, primera: e.t, ultima: e.t, recursos: new Set() };
       x.n++;
       if (e.t < x.primera) x.primera = e.t;
-      if (e.t > x.ultima) x.ultima = e.t;
+      if (e.t >= x.ultima) { x.ultima = e.t; if (e.n) x.nombre = e.n; }
+      if (!x.nombre && e.n) x.nombre = e.n;
       x.recursos.add(nombreRecurso(e.r));
       m.set(e.m, x);
     });
@@ -379,9 +416,9 @@
 
     var evs = eventosOrdenados(), paginas = Math.max(1, Math.ceil(evs.length / POR_PAGINA));
     pagina = Math.min(pagina, paginas - 1);
-    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Correo', clase: 'correo' }, { titulo: 'Versión' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
+    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Nombre' }, { titulo: 'Correo', clase: 'correo' }, { titulo: 'Versión' }, { titulo: 'Licencia firmada' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
       evs.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA).map(function (e) {
-        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.m || '—', e.v, datos.origenes[e.o] || e.o, e.s];
+        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '—', e.m || '—', e.v, botonLicencia(e), datos.origenes[e.o] || e.o, e.s];
       }));
     $('t-eventos-nota').textContent = fmt.format(evs.length) + ' registros · ' + textoFiltros(calc.rango);
     $('pag-info').textContent = 'Página ' + (pagina + 1) + ' de ' + paginas;
@@ -402,6 +439,7 @@
         ['Descargas con licencia aceptada (período)', String(k.descargas)],
         ['Descargas totales (histórico)', String(k.historico)],
         ['Correos únicos (período)', String(k.correos)],
+        ['Licencias firmadas (período)', String(calc.enRango.filter(firmada).length)],
         ['Sesiones únicas (período)', String(k.sesiones)],
         ['Copias de la licencia guardadas (período)', String(k.copias)],
         ['Recursos descargados', k.recursos + ' de ' + k.totalRecursos],
@@ -413,10 +451,10 @@
         filas: calc.cubetas.map(function (c) { return [diaAPartes(c.dia), c.n]; }) },
       { nombre: 'Por origen', columnas: [{ titulo: 'Sección', ancho: 34 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }],
         filas: calc.porOrigen.map(function (f) { return [f.nombre, f.n]; }) },
-      { nombre: 'Por correo', columnas: [{ titulo: 'Correo', ancho: 36 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }, { titulo: 'Primera descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Recursos', ancho: 50 }],
-        filas: porCorreo().map(function (x) { return [x.correo, x.n, partes(x.primera), partes(x.ultima), Array.from(x.recursos).join(', ')]; }) },
-      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Correo', ancho: 34 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
-        filas: eventosOrdenados().map(function (e) { return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.m || '', e.v, datos.origenes[e.o] || e.o, e.s]; }) },
+      { nombre: 'Por correo', columnas: [{ titulo: 'Correo', ancho: 36 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }, { titulo: 'Primera descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Recursos', ancho: 50 }],
+        filas: porCorreo().map(function (x) { return [x.correo, x.nombre, x.n, partes(x.primera), partes(x.ultima), Array.from(x.recursos).join(', ')]; }) },
+      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Correo', ancho: 34 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'ID de aceptación', ancho: 38 }, { titulo: 'Código de verificación', ancho: 26 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
+        filas: eventosOrdenados().map(function (e) { var ok = firmada(e); return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '', e.m || '', e.v, ok ? e.id : '', ok ? codigo(e) : '', datos.origenes[e.o] || e.o, e.s]; }) },
     ];
     XLSXMin.descargar('COGNI-move_descargas_' + hoy() + '.xlsx', hojas);
   });
