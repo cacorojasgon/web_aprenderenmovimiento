@@ -24,10 +24,12 @@ export function validarDescarga(d) {
   const email = texto(d.email, { min: 6, max: 254 });
   if (!email || !EMAIL_RE.test(email)) return { error: 'Ingresa un correo electrónico válido.' };
   if (typeof d.sesion !== 'string' || !UUID_RE.test(d.sesion)) return { error: 'Solicitud inválida.' };
+  // Autorización opcional y separada (cláusula 12) para que el equipo de investigación contacte a quien firma.
+  if (d.seguimiento !== undefined && typeof d.seguimiento !== 'boolean') return { error: 'Solicitud inválida.' };
   const origen = Object.hasOwn(ORIGENES, d.origen) ? d.origen : 'otro';
   return {
     recurso,
-    evento: { e: 'descarga', r: recurso.id, v: VERSION_VIGENTE, o: origen, s: d.sesion.toLowerCase(), m: email.toLowerCase(), n: nombre },
+    evento: { e: 'descarga', r: recurso.id, v: VERSION_VIGENTE, o: origen, s: d.sesion.toLowerCase(), m: email.toLowerCase(), n: nombre, sg: d.seguimiento === true },
   };
 }
 

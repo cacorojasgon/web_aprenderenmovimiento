@@ -16,7 +16,9 @@ export function armarCorreoLicencia(reg) {
     `Hola, ${reg.n}:`,
     `Adjuntamos tu copia de la Licencia de uso del material del programa Cognición en Movimiento (versión ${reg.v}), firmada electrónicamente el ${fechaChile(reg.t)} (hora de Chile) al descargar «${recurso}».`,
     `Código de verificación: ${codigoVerificacion(reg.f)}. ID de aceptación: ${reg.id}.`,
-    'Recibes este correo porque lo solicitaste desde el sitio web del programa. Tus datos se usan solo con fines de registro interno de la aceptación de la licencia.',
+    reg.sg
+      ? 'Recibes este correo porque lo solicitaste desde el sitio web del programa. Tus datos se usan para el registro interno de la aceptación de la licencia y, porque lo autorizaste, para que el equipo de investigación te contacte con fines de seguimiento del impacto del programa. Puedes retirar esa autorización en cualquier momento a través del formulario de contacto del sitio.'
+      : 'Recibes este correo porque lo solicitaste desde el sitio web del programa. Tus datos se usan solo con fines de registro interno de la aceptación de la licencia.',
     'Programa Cognición en Movimiento (COGNI-move) · Facultad de Ciencias de la Rehabilitación · Universidad Andrés Bello',
   ];
   return {
