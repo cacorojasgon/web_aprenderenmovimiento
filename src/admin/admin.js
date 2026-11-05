@@ -358,7 +358,7 @@
   }
 
   // ---------- Licencias firmadas ----------
-  // Solo las descargas desde la versión 1.2 tienen copia firmada (nombre + sello del servidor).
+  // Las descargas tienen copia firmada (nombre + sello del servidor).
   function firmada(e) { return e.e === 'descarga' && e.id && e.f && e.n; }
   function codigo(e) { return e.f.slice(0, 20).toUpperCase().match(/.{4}/g).join('-'); }
   function guardar(blob, nombre) {

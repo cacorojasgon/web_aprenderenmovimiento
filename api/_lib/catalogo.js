@@ -17,8 +17,8 @@ export const RECURSOS = [
   },
 ];
 
-// Versión vigente al final; las anteriores se mantienen para leer el registro histórico.
-export const VERSIONES_LICENCIA = ['1.0', '1.1', '1.2'];
+// Versión vigente al final; las anteriores se mantienen para leer el registro histórico (y emitir sus copias firmadas).
+export const VERSIONES_LICENCIA = ['1.0'];
 export const VERSION_VIGENTE = VERSIONES_LICENCIA.at(-1);
 
 export const EVENTOS = {
