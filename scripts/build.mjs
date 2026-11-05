@@ -81,7 +81,8 @@ const enVercel = Boolean(process.env.VERCEL || process.env.CI);
 const DIR_LICENCIAS = path.join(RAIZ, 'api', '_lib', 'licencias');
 
 async function sincronizarArchivo(ruta, contenido, descripcion) {
-  const actual = await readFile(ruta, 'utf8').catch(() => null);
+  // Git en Windows puede dejar CRLF en la copia de trabajo: se compara con saltos de línea normalizados.
+  const actual = (await readFile(ruta, 'utf8').catch(() => null))?.replace(/\r\n/g, '\n');
   if (actual === contenido) return;
   if (enVercel) { errores.push(`${descripcion} no está al día: corre el build en local y haz commit`); return; }
   await mkdir(path.dirname(ruta), { recursive: true });
@@ -97,7 +98,7 @@ async function sincronizarLicencia(html) {
   }
   const m = html.match(/<article class="lic-texto" data-lic-texto>([\s\S]*?)<\/article>/);
   if (!m) { errores.push('No se encontró el texto de la licencia (<article data-lic-texto>)'); return; }
-  const texto = m[1].trim();
+  const texto = m[1].replace(/\r\n?/g, '\n').trim();
   const ruta = path.join(DIR_LICENCIAS, `v${version}.js`);
   const existente = await readFile(ruta, 'utf8').catch(() => null);
   if (existente !== null) {
