@@ -57,7 +57,7 @@ test('registro: rechaza recurso, versión, evento o sesión inválidos', () => {
   const ok = { evento: 'copia_licencia', recurso: RECURSO, version: VERSION_VIGENTE, sesion };
   assert.equal(validarRegistro({ ...ok, recurso: 'Otro' }), null);
   assert.equal(validarRegistro({ ...ok, version: '9.9' }), null);
-  assert.equal(validarRegistro({ ...ok, version: '1.0' }), null);
+  assert.equal(validarRegistro({ ...ok, version: '0.9' }), null);
   assert.equal(validarRegistro({ ...ok, evento: '__proto__' }), null);
   assert.equal(validarRegistro({ ...ok, sesion: 'abc' }), null);
 });
@@ -73,7 +73,7 @@ test('descarga: exige licencia vigente aceptada, nombre y correo, y los registra
   assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl', n: 'María José Ñúñez-O’Higgins' });
   assert.ok(validarDescarga({ ...pedido, acepta: 'true' }).error);
   assert.ok(validarDescarga({ ...pedido, acepta: undefined }).error);
-  assert.ok(validarDescarga({ ...pedido, version: '1.0' }).error);
+  assert.ok(validarDescarga({ ...pedido, version: '0.9' }).error);
   assert.ok(validarDescarga({ ...pedido, email: '' }).error);
   assert.ok(validarDescarga({ ...pedido, email: 'no-es-correo' }).error);
   assert.ok(validarDescarga({ ...pedido, email: 'a@b.cl\r\nBcc: x@y.z' }).error);

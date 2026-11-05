@@ -102,12 +102,11 @@ firmadas; las licencias ya emitidas conservan su sello y siguen disponibles en e
 Cada descarga guarda: fecha y hora del servidor, recurso, versión de licencia aceptada, nombre y correo
 electrónico de quien firma, sección de origen y un identificador técnico de sesión aleatorio. Si el registro no
 está disponible, el archivo no se entrega. Las copias sin firmar de la licencia se registran sin datos personales.
-No se guardan IP. Los registros anteriores a la versión 1.1 no tienen correo y los anteriores a la 1.2 no tienen
-nombre ni copia firmada.
+No se guardan IP.
 
 ## Licencia firmada
 
-Desde la versión 1.2, la descarga funciona como firma electrónica simple (Ley N° 19.799): la persona indica su
+La descarga funciona como firma electrónica simple (Ley N° 19.799): la persona indica su
 nombre y correo, marca la casilla y presiona «Firmar y descargar». El servidor guarda la constancia (`cm:lic:<id>`
 en Upstash, además del registro de eventos) con la fecha y hora del servidor, la huella SHA-256 del texto aceptado
 y un sello HMAC; los primeros 20 caracteres del sello son el **código de verificación** que aparece en el PDF.
