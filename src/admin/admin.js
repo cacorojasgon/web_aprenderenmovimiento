@@ -104,8 +104,16 @@
   }
 
   function textoFiltros(r) {
-    var rec = $('f-recurso');
-    return diaLargo(r.desde) + ' – ' + diaLargo(r.hasta) + ' · ' + rec.options[rec.selectedIndex].text;
+    var rec = $('f-recurso'), sg = $('f-seguimiento');
+    return diaLargo(r.desde) + ' – ' + diaLargo(r.hasta) + ' · ' + rec.options[rec.selectedIndex].text + (sg.value ? ' · ' + sg.options[sg.selectedIndex].text : '');
+  }
+
+  // Autorización opcional de contacto para seguimiento de impacto (solo existe en descargas firmadas).
+  function textoSeguimiento(e) { return e.e !== 'descarga' || typeof e.sg !== 'boolean' ? '—' : e.sg ? 'Sí' : 'No'; }
+  function pasaSeguimiento(e) {
+    var f = $('f-seguimiento').value;
+    if (!f) return true;
+    return e.e === 'descarga' && e.sg === (f === 'si');
   }
 
   $('f-periodo').addEventListener('change', function () {
@@ -114,7 +122,7 @@
     if (personalizado && !$('f-desde').value) { var r = { desde: sumarDias(hoy(), -29), hasta: hoy() }; $('f-desde').value = r.desde; $('f-hasta').value = r.hasta; }
     pagina = 0; render();
   });
-  ['f-desde', 'f-hasta', 'f-recurso'].forEach(function (id) { $(id).addEventListener('change', function () { pagina = 0; render(); }); });
+  ['f-desde', 'f-hasta', 'f-recurso', 'f-seguimiento'].forEach(function (id) { $(id).addEventListener('change', function () { pagina = 0; render(); }); });
 
   // ---------- Pestañas Resumen / Tablas ----------
   var tabs = [$('tab-resumen'), $('tab-tablas')];
@@ -138,7 +146,7 @@
   // ---------- Agregación ----------
   function calcular() {
     var r = rango(), recurso = $('f-recurso').value;
-    var eventos = datos.eventos.map(function (e) { return Object.assign({ dia: partes(e.t).dia }, e); });
+    var eventos = datos.eventos.filter(pasaSeguimiento).map(function (e) { return Object.assign({ dia: partes(e.t).dia }, e); });
     var enRango = eventos.filter(function (e) { return e.dia >= r.desde && e.dia <= r.hasta && (!recurso || e.r === recurso); });
     var descargas = enRango.filter(function (e) { return e.e === 'descarga'; });
 
@@ -177,11 +185,19 @@
         historico: eventos.filter(function (e) { return e.e === 'descarga' && (!recurso || e.r === recurso); }).length,
         sesiones: new Set(descargas.map(function (e) { return e.s; })).size,
         correos: new Set(descargas.filter(function (e) { return e.m; }).map(function (e) { return e.m; })).size,
+        seguimiento: personasSeguimiento(descargas),
         copias: enRango.filter(function (e) { return e.e === 'copia_licencia'; }).length,
         recursos: new Set(descargas.map(function (e) { return e.r; })).size,
         totalRecursos: porRecurso.length,
       },
     };
+  }
+
+  // Personas (correo) cuya firma más reciente del conjunto autoriza el contacto.
+  function personasSeguimiento(descargas) {
+    var ultima = new Map();
+    descargas.forEach(function (e) { if (e.m && typeof e.sg === 'boolean') { var u = ultima.get(e.m); if (!u || e.t >= u.t) ultima.set(e.m, e); } });
+    return Array.from(ultima.values()).filter(function (e) { return e.sg; }).length;
   }
 
   var calc = null;
@@ -193,6 +209,8 @@
     $('k-correos').textContent = fmt.format(k.correos);
     $('k-correos-nota').textContent = 'Correos únicos · ' + fmt.format(k.sesiones) + ' sesiones únicas';
     $('k-copias').textContent = fmt.format(k.copias);
+    $('k-seguimiento').textContent = fmt.format(k.seguimiento);
+    $('k-seguimiento-nota').textContent = k.correos ? Math.round((k.seguimiento / k.correos) * 100) + '% de las personas que descargaron' : 'Personas que aceptan ser contactadas';
     $('k-recursos').textContent = fmt.format(k.recursos);
     $('k-recursos-nota').textContent = 'de ' + fmt.format(k.totalRecursos) + ' disponible' + (k.totalRecursos === 1 ? '' : 's');
     $('g-dia-titulo').textContent = calc.semanal ? 'Descargas por semana' : 'Descargas por día';
@@ -394,10 +412,11 @@
     var m = new Map();
     calc.enRango.forEach(function (e) {
       if (e.e !== 'descarga' || !e.m) return;
-      var x = m.get(e.m) || { correo: e.m, nombre: '', n: 0, primera: e.t, ultima: e.t, recursos: new Set() };
+      var x = m.get(e.m) || { correo: e.m, nombre: '', n: 0, primera: e.t, ultima: e.t, recursos: new Set(), sg: null };
       x.n++;
       if (e.t < x.primera) x.primera = e.t;
-      if (e.t >= x.ultima) { x.ultima = e.t; if (e.n) x.nombre = e.n; }
+      if (e.t >= x.ultima) { x.ultima = e.t; if (e.n) x.nombre = e.n; if (typeof e.sg === 'boolean') x.sg = e.sg; }
+      if (x.sg === null && typeof e.sg === 'boolean') x.sg = e.sg;
       if (!x.nombre && e.n) x.nombre = e.n;
       x.recursos.add(nombreRecurso(e.r));
       m.set(e.m, x);
@@ -416,9 +435,9 @@
 
     var evs = eventosOrdenados(), paginas = Math.max(1, Math.ceil(evs.length / POR_PAGINA));
     pagina = Math.min(pagina, paginas - 1);
-    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Nombre' }, { titulo: 'Correo', clase: 'correo' }, { titulo: 'Versión' }, { titulo: 'Licencia firmada' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
+    tabla('t-eventos', [{ titulo: 'Fecha y hora (Chile)' }, { titulo: 'Evento' }, { titulo: 'Recurso' }, { titulo: 'Nombre' }, { titulo: 'Correo', clase: 'correo' }, { titulo: 'Versión' }, { titulo: 'Licencia firmada' }, { titulo: 'Seguimiento' }, { titulo: 'Origen' }, { titulo: 'Sesión', clase: 'sesion' }],
       evs.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA).map(function (e) {
-        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '—', e.m || '—', e.v, botonLicencia(e), datos.origenes[e.o] || e.o, e.s];
+        return [fechaHora(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '—', e.m || '—', e.v, botonLicencia(e), textoSeguimiento(e), datos.origenes[e.o] || e.o, e.s];
       }));
     $('t-eventos-nota').textContent = fmt.format(evs.length) + ' registros · ' + textoFiltros(calc.rango);
     $('pag-info').textContent = 'Página ' + (pagina + 1) + ' de ' + paginas;
@@ -436,9 +455,11 @@
       { nombre: 'Resumen', columnas: [{ titulo: 'Indicador', ancho: 38 }, { titulo: 'Valor', ancho: 46 }], filas: [
         ['Período', textoFiltros(calc.rango)],
         ['Recurso', recSel.options[recSel.selectedIndex].text],
+        ['Seguimiento', $('f-seguimiento').options[$('f-seguimiento').selectedIndex].text],
         ['Descargas con licencia aceptada (período)', String(k.descargas)],
         ['Descargas totales (histórico)', String(k.historico)],
         ['Correos únicos (período)', String(k.correos)],
+        ['Personas que autorizan seguimiento (período)', String(k.seguimiento)],
         ['Licencias firmadas (período)', String(calc.enRango.filter(firmada).length)],
         ['Sesiones únicas (período)', String(k.sesiones)],
         ['Copias de la licencia guardadas (período)', String(k.copias)],
@@ -451,10 +472,10 @@
         filas: calc.cubetas.map(function (c) { return [diaAPartes(c.dia), c.n]; }) },
       { nombre: 'Por origen', columnas: [{ titulo: 'Sección', ancho: 34 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }],
         filas: calc.porOrigen.map(function (f) { return [f.nombre, f.n]; }) },
-      { nombre: 'Por correo', columnas: [{ titulo: 'Correo', ancho: 36 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }, { titulo: 'Primera descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Recursos', ancho: 50 }],
-        filas: porCorreo().map(function (x) { return [x.correo, x.nombre, x.n, partes(x.primera), partes(x.ultima), Array.from(x.recursos).join(', ')]; }) },
-      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Correo', ancho: 34 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'ID de aceptación', ancho: 38 }, { titulo: 'Código de verificación', ancho: 26 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
-        filas: eventosOrdenados().map(function (e) { var ok = firmada(e); return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '', e.m || '', e.v, ok ? e.id : '', ok ? codigo(e) : '', datos.origenes[e.o] || e.o, e.s]; }) },
+      { nombre: 'Por correo', columnas: [{ titulo: 'Correo', ancho: 36 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Descargas', tipo: 'numero', ancho: 12 }, { titulo: 'Primera descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Última descarga', tipo: 'fecha', ancho: 20 }, { titulo: 'Autoriza seguimiento', ancho: 20 }, { titulo: 'Recursos', ancho: 50 }],
+        filas: porCorreo().map(function (x) { return [x.correo, x.nombre, x.n, partes(x.primera), partes(x.ultima), x.sg === null ? '' : x.sg ? 'Sí' : 'No', Array.from(x.recursos).join(', ')]; }) },
+      { nombre: 'Registro', columnas: [{ titulo: 'Fecha y hora (Chile)', tipo: 'fecha', ancho: 20 }, { titulo: 'Evento', ancho: 32 }, { titulo: 'Recurso', ancho: 44 }, { titulo: 'Nombre', ancho: 30 }, { titulo: 'Correo', ancho: 34 }, { titulo: 'Versión de licencia', ancho: 18 }, { titulo: 'ID de aceptación', ancho: 38 }, { titulo: 'Código de verificación', ancho: 26 }, { titulo: 'Autoriza seguimiento', ancho: 20 }, { titulo: 'Origen', ancho: 32 }, { titulo: 'Sesión', ancho: 40 }],
+        filas: eventosOrdenados().map(function (e) { var ok = firmada(e); return [partes(e.t), datos.tiposEvento[e.e] || e.e, nombreRecurso(e.r), e.n || '', e.m || '', e.v, ok ? e.id : '', ok ? codigo(e) : '', textoSeguimiento(e) === '—' ? '' : textoSeguimiento(e), datos.origenes[e.o] || e.o, e.s]; }) },
     ];
     XLSXMin.descargar('COGNI-move_descargas_' + hoy() + '.xlsx', hojas);
   });

@@ -107,6 +107,7 @@ export async function pdfLicenciaFirmada(reg, recurso, licencia) {
     ['Correo electrónico', reg.m],
     ['Recurso', recurso ? `${recurso.nombre} (${recurso.formato})` : reg.r],
     ['Versión de la licencia', reg.v],
+    ...(typeof reg.sg === 'boolean' ? [['Contacto para seguimiento', reg.sg ? 'Sí autoriza (consentimiento opcional y revocable)' : 'No autoriza']] : []),
     ['Fecha y hora de la firma', `${fechaChile(reg.t)} (hora de Chile) · ${reg.t} UTC`],
     ['ID de aceptación', reg.id],
     ['Huella SHA-256 del texto', reg.h],

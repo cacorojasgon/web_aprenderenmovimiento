@@ -9,9 +9,9 @@ const HORAS_TOKEN = 24;
 export const claveLicencia = (id) => `cm:lic:${id}`;
 
 export function sello(reg) {
-  return createHmac('sha256', secreto())
-    .update(JSON.stringify(['cm-licencia', reg.id, reg.t, reg.n, reg.m, reg.r, reg.v, reg.h]))
-    .digest('hex');
+  const campos = ['cm-licencia', reg.id, reg.t, reg.n, reg.m, reg.r, reg.v, reg.h];
+  if (typeof reg.sg === 'boolean') campos.push(reg.sg);
+  return createHmac('sha256', secreto()).update(JSON.stringify(campos)).digest('hex');
 }
 
 // Código legible que aparece en el PDF: los primeros 20 dígitos del sello, en grupos de 4.

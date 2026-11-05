@@ -70,7 +70,7 @@ const pedido = { recurso: RECURSO, version: VERSION_VIGENTE, nombre: '  María J
 test('descarga: exige licencia vigente aceptada, nombre y correo, y los registra normalizados', () => {
   const { evento, recurso } = validarDescarga(pedido);
   assert.equal(recurso.archivo, 'plantilla-ficha-aula.docx');
-  assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl', n: 'María José Ñúñez-O’Higgins' });
+  assert.deepEqual(evento, { e: 'descarga', r: 'plantilla-ficha-aula', v: VERSION_VIGENTE, o: 'esc', s: sesion, m: 'ana.perez@colegio.cl', n: 'María José Ñúñez-O’Higgins', sg: false });
   assert.ok(validarDescarga({ ...pedido, acepta: 'true' }).error);
   assert.ok(validarDescarga({ ...pedido, acepta: undefined }).error);
   assert.ok(validarDescarga({ ...pedido, version: '0.9' }).error);
@@ -87,6 +87,13 @@ test('descarga: el nombre es obligatorio, acotado y solo admite letras y signos 
     assert.ok(validarDescarga({ ...pedido, nombre }).error, String(nombre));
   }
   assert.equal(validarDescarga({ ...pedido, nombre: "D'Angelo Müller" }).evento.n, "D'Angelo Müller");
+});
+
+test('descarga: la autorización de seguimiento es opcional, booleana y no condiciona la descarga', () => {
+  assert.equal(validarDescarga({ ...pedido, seguimiento: true }).evento.sg, true);
+  assert.equal(validarDescarga({ ...pedido, seguimiento: false }).evento.sg, false);
+  assert.equal(validarDescarga({ ...pedido, seguimiento: undefined }).evento.sg, false);
+  for (const seguimiento of ['true', 1, null, ['x']]) assert.ok(validarDescarga({ ...pedido, seguimiento }).error, String(seguimiento));
 });
 
 // ---------- Licencia firmada ----------
@@ -111,6 +118,7 @@ test('licencia: el registro firmado lleva hora del servidor, huella del texto y 
   assert.equal(reg.f, sello(reg));
   assert.notEqual(sello({ ...reg, n: 'Otra Persona' }), reg.f);
   assert.notEqual(sello({ ...reg, t: '2026-11-02T18:42:11.123Z' }), reg.f);
+  assert.notEqual(sello({ ...reg, sg: true }), reg.f);
   assert.match(codigoVerificacion(reg.f), /^[0-9A-F]{4}(-[0-9A-F]{4}){4}$/);
 });
 
@@ -148,6 +156,8 @@ test('licencia: el correo con la copia escapa HTML y lleva código e ID', () => 
   assert.ok(!/[\r\n]/.test(asunto));
   assert.ok(text.includes(codigoVerificacion(reg.f)));
   assert.ok(text.includes(reg.id));
+  assert.ok(!text.includes('seguimiento'));
+  assert.ok(armarCorreoLicencia({ ...reg, sg: true }).text.includes('seguimiento del impacto'));
 });
 
 test('descarga: cada recurso del catálogo tiene su archivo en recursos/', async () => {

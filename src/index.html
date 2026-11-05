@@ -723,6 +723,14 @@ html:has(.lic-dialog[open]){overflow:hidden}
 .lic-copia:disabled{color:#5A6683;text-decoration:none;cursor:progress}
 .lic-dialog :focus-visible{outline:3px solid #E8692E;outline-offset:2px}
 .lic-hint{margin:0;font-size:14px;color:#3B4763}
+/* Dos pasos: 1) leer la licencia con un pie mínimo; 2) firmar, con el formulario a pantalla completa */
+.lic-pie-leer .lic-acciones{margin-top:0}
+.lic-pie-leer .lic-hint{margin:0 0 10px}
+.lic-dialog[data-paso="firmar"] .lic-cuerpo{display:none}
+.lic-dialog[data-paso="firmar"] .lic-pie{flex:1 1 auto;min-height:0;overflow-y:auto;border-top:0;background:#FFFFFF;padding-top:20px}
+.lic-firma-intro{margin:0 0 16px;font-size:15.5px;color:#3B4763}
+.lic-check-opc{margin-top:14px;padding:12px 14px;border-radius:12px;background:#F2F5FC;font-size:14.5px;color:#3B4763}
+.lic-opc{display:inline-block;margin-right:4px;padding:0 8px;border-radius:999px;background:#FFFFFF;border:1px solid #D5DCEC;font-size:12.5px;font-weight:700;color:#5A6683}
 @media (max-width:600px){
  .lic-dialog{width:calc(100vw - 32px);border-radius:16px;font-size:16px}
  .lic-cab{padding:16px 16px 12px}
@@ -742,12 +750,14 @@ html:has(.lic-dialog[open]){overflow:hidden}
  .lic-acciones{gap:8px;margin-top:10px}
  .lic-acciones .lic-btn{flex:1 1 auto;justify-content:center;padding:10px 12px;font-size:15px}
  .lic-copia{margin-left:0;font-size:14px}
+ .lic-check-opc{font-size:13.5px;padding:10px 12px}
 }
 /* Pantallas chicas o bajas: cabecera y texto se desplazan juntos; solo el pie (correo y aceptación) queda fijo */
 @media (max-width:600px),(max-height:760px){
  .lic-dialog[open]{display:block;overflow-y:auto;overscroll-behavior:contain}
  .lic-cuerpo{overflow:visible}
  .lic-pie{position:sticky;bottom:0;z-index:1;box-shadow:0 -8px 16px rgba(12,22,48,.08)}
+ .lic-dialog[data-paso="firmar"] .lic-pie{position:static;box-shadow:none;overflow:visible}
 }
 </style>
 
@@ -927,7 +937,16 @@ html:has(.lic-dialog[open]){overflow:hidden}
  </div>
 
  <footer class="lic-pie">
-  <div id="licencia-form">
+  <div id="licencia-leer" class="lic-pie-leer">
+   <p class="lic-hint">Lee la licencia completa. Para descargar, continúa a la firma.</p>
+   <div class="lic-acciones">
+    <button type="button" class="lic-btn lic-btn-pri" id="licencia-continuar">Continuar a la firma →</button>
+    <button type="button" class="lic-btn lic-btn-sec" data-lic-cerrar>Cancelar</button>
+    <button type="button" class="lic-copia" id="licencia-copia">Guardar el texto de la licencia (PDF)</button>
+   </div>
+  </div>
+  <div id="licencia-form" hidden>
+   <p class="lic-firma-intro">Vas a firmar electrónicamente la Licencia de uso del material (versión 1.0). Si quieres revisarla otra vez, vuelve a la licencia antes de firmar.</p>
    <div class="lic-campos">
     <div class="lic-correo">
      <label for="licencia-nombre">Nombre completo <span class="lic-req">(obligatorio)</span></label>
@@ -940,10 +959,10 @@ html:has(.lic-dialog[open]){overflow:hidden}
    </div>
    <p id="licencia-datos-ayuda" class="lic-ayuda">Tu nombre y correo se solicitan solo con fines de registro interno y para emitir tu copia firmada de la licencia. No los usaremos para enviarte publicidad ni los compartiremos con terceros.</p>
    <label class="lic-check"><input type="checkbox" id="licencia-acepto"> <span>Declaro ser mayor de edad, haber leído la Licencia de uso del material (versión 1.0), aceptar sus términos, incluida la cláusula de protección de datos personales, y firmarla electrónicamente con mi nombre.</span></label>
+   <label class="lic-check lic-check-opc"><input type="checkbox" id="licencia-seguimiento"> <span><span class="lic-opc">Opcional</span> Autorizo al equipo de investigación del programa Cognición en Movimiento (Universidad Andrés Bello) a contactarme por correo electrónico con fines de seguimiento del impacto de la iniciativa. No es necesario para descargar y puedo retirar esta autorización en cualquier momento a través del formulario de contacto.</span></label>
    <div class="lic-acciones">
     <button type="button" class="lic-btn lic-btn-pri" id="licencia-descargar" disabled>Firmar y descargar</button>
-    <button type="button" class="lic-btn lic-btn-sec" data-lic-cerrar>Cancelar</button>
-    <button type="button" class="lic-copia" id="licencia-copia">Guardar el texto de la licencia (PDF)</button>
+    <button type="button" class="lic-btn lic-btn-sec" data-lic-volver>← Volver a la licencia</button>
    </div>
   </div>
   <div id="licencia-firmada" class="lic-firmada" hidden>
@@ -997,6 +1016,9 @@ html:has(.lic-dialog[open]){overflow:hidden}
  var dlg=document.getElementById('licencia-material');
  if(!dlg||typeof dlg.showModal!=='function')return;
  var chk=document.getElementById('licencia-acepto');
+ var seg=document.getElementById('licencia-seguimiento');
+ var leer=document.getElementById('licencia-leer');
+ var bContinuar=document.getElementById('licencia-continuar');
  var nombre=document.getElementById('licencia-nombre');
  var correo=document.getElementById('licencia-correo');
  var btn=document.getElementById('licencia-descargar');
@@ -1006,7 +1028,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
  var bPdf=document.getElementById('licencia-pdf');
  var bEnviar=document.getElementById('licencia-enviar');
  var cuerpo=dlg.querySelector('.lic-cuerpo');
- var actual=null, enCurso=false, firma=null;
+ var actual=null, enCurso=false, firma=null, scrollLectura=0;
  var NOMBRE_RE=/^\p{L}[\p{L}\p{M} .'’-]*$/u;
 
  /* Registro y firma (cláusulas 12 y 14): el servidor guarda nombre, correo, fecha y hora, versión, recurso e identificador técnico de sesión */
@@ -1019,6 +1041,14 @@ html:has(.lic-dialog[open]){overflow:hidden}
  function nombreValido(){var v=nombreLimpio();return v.length>=3&&v.length<=100&&NOMBRE_RE.test(v);}
  function actualizarBoton(){btn.disabled=enCurso||!chk.checked||!nombreValido()||!correo.value.trim()||!correo.checkValidity();}
  function mostrarFirmada(si){form.hidden=si; firmada.hidden=!si;}
+ /* Paso 1 (leer): texto de la licencia con un pie mínimo. Paso 2 (firmar): solo el formulario de firma. */
+ function paso(p){
+  if(p==='firmar')scrollLectura=cuerpo.scrollTop||dlg.scrollTop;
+  dlg.setAttribute('data-paso',p); leer.hidden=p!=='leer';
+  if(p==='firmar'){mostrarFirmada(false); dlg.scrollTop=0; nombre.focus();}
+  else{form.hidden=true; firmada.hidden=true; cuerpo.scrollTop=scrollLectura; dlg.scrollTop=scrollLectura; bContinuar.focus();}
+  estado('');
+ }
 
  function abrir(origen){
   var p=origen.closest('.ap-panel'), m=p&&p.className.match(/ap-panel-(inf|esc|adu)/);
@@ -1030,15 +1060,18 @@ html:has(.lic-dialog[open]){overflow:hidden}
   };
   dlg.querySelector('[data-lic-recurso]').textContent=actual.recurso;
   dlg.querySelector('[data-lic-formato]').textContent=actual.formato;
-  firma=null; mostrarFirmada(false); bEnviar.disabled=false;
-  chk.checked=false; estado(''); actualizarBoton();
-  dlg.showModal(); cuerpo.scrollTop=0; dlg.scrollTop=0;
+  firma=null; bEnviar.disabled=false;
+  chk.checked=false; seg.checked=false; actualizarBoton();
+  dlg.setAttribute('data-paso','leer'); leer.hidden=false; form.hidden=true; firmada.hidden=true; estado('');
+  dlg.showModal(); scrollLectura=0; cuerpo.scrollTop=0; dlg.scrollTop=0;
  }
 
  document.querySelectorAll('[data-licencia]').forEach(function(a){
   a.addEventListener('click',function(e){e.preventDefault();abrir(a);});
  });
  chk.addEventListener('change',actualizarBoton);
+ bContinuar.addEventListener('click',function(){paso('firmar');});
+ dlg.querySelectorAll('[data-lic-volver]').forEach(function(b){b.addEventListener('click',function(){paso('leer');});});
  nombre.addEventListener('input',function(){nombre.setCustomValidity('');actualizarBoton();});
  correo.addEventListener('input',actualizarBoton);
 
@@ -1063,7 +1096,7 @@ html:has(.lic-dialog[open]){overflow:hidden}
   enCurso=true; actualizarBoton();
   var et=btn.textContent; btn.textContent='Firmando…'; estado('');
   fetch('/api/descarga',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-   recurso:actual.recurso, version:VERSION, nombre:nombreLimpio(), email:correo.value.trim(), acepta:true, origen:actual.seccion, sesion:sesion()
+   recurso:actual.recurso, version:VERSION, nombre:nombreLimpio(), email:correo.value.trim(), acepta:true, seguimiento:seg.checked, origen:actual.seccion, sesion:sesion()
   })})
    .then(function(r){
     if(!r.ok)return errorDe(r,'No pudimos preparar la descarga. Inténtalo nuevamente en unos minutos.');
