@@ -7,6 +7,7 @@
 // - Imágenes: solo se reducen si superan 3x su alto máximo en pantalla; PNG -> WebP sin pérdida;
 //   JPEG sin reducir se copia byte a byte. Nunca se recomprime con pérdida algo que no cambió de tamaño.
 // - Mueve los <script> inline a archivos externos (la CSP queda en script-src 'self', sin hashes).
+// - Publica los diccionarios de src/i18n/ con huella y avisa de textos sin traducir.
 // - Genera el set de favicon desde src/favicon.svg.
 // - Falla si el HTML no coincide con api/_lib/catalogo.js o si quedan manejadores inline.
 import { readFile, writeFile, mkdir, rm, copyFile, readdir } from 'node:fs/promises';
@@ -15,6 +16,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { pathToFileURL } from 'node:url';
 import { RECURSOS, MOTIVOS, PAISES, VERSION_VIGENTE } from '../api/_lib/catalogo.js';
+import { leerDiccionarios, revisarDiccionario } from './i18n.mjs';
 
 const RAIZ = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(RAIZ, 'src');
@@ -205,6 +207,24 @@ async function externalizarScripts(html) {
   return html;
 }
 
+// ---------- 3b. Idiomas ----------
+// Cada src/i18n/<idioma>.json se publica con huella y su ruta reemplaza '/i18n/<idioma>.json' en el HTML.
+// Un texto sin traducción no detiene el build: se muestra en español y se avisa aquí.
+async function publicarIdiomas(html, fuente) {
+  const diccionarios = await leerDiccionarios(path.join(SRC, 'i18n'));
+  for (const [idioma, dic] of Object.entries(diccionarios)) {
+    const { faltan, repetidas } = revisarDiccionario(fuente, dic);
+    if (faltan.length) console.warn(`Aviso: ${faltan.length} texto(s) sin traducción en src/i18n/${idioma}.json:\n  - ` + faltan.map((t) => t.slice(0, 90)).join('\n  - '));
+    if (repetidas.length) errores.push(`src/i18n/${idioma}.json repite traducciones (no se podría volver al español): ${repetidas.join('; ')}`);
+    const buf = Buffer.from(JSON.stringify(dic));
+    const url = await escribir(path.join('assets', 'i18n', `${idioma}.${hash(buf)}.json`), buf);
+    const marca = `'/i18n/${idioma}.json'`;
+    if (!html.includes(marca)) errores.push(`El HTML no referencia el diccionario ${marca}`);
+    html = html.replace(marca, () => `'${url}'`);
+  }
+  return html;
+}
+
 // ---------- 4. Favicon ----------
 function ico(pngs) {
   const cab = Buffer.alloc(6 + 16 * pngs.length);
@@ -266,6 +286,11 @@ if (errores.length) {
   process.exit(1);
 }
 let { html, reporte, ocurrencias, unicos } = await extraerRecursos(sinDescargables);
+html = await publicarIdiomas(html, fuente);
+if (errores.length) {
+  console.error('Build detenido:\n- ' + errores.join('\n- '));
+  process.exit(1);
+}
 html = await externalizarScripts(html);
 if (/(src|href)="data:/.test(html)) throw new Error('Quedó un recurso embebido sin extraer');
 await escribir('index.html', Buffer.from(html));

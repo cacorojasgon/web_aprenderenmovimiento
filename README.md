@@ -47,6 +47,22 @@ Reglas para que el build no falle:
   versión nueva, el build local crea su archivo y hay que incluirlo en el commit; nunca borrar versiones anteriores.
 - Opciones nuevas de motivo o país del formulario también van en el catálogo (el build valida que coincidan).
 
+### Idiomas
+
+El sitio se escribe en español. El botón de idioma (arriba a la derecha) traduce la página en el navegador con
+`src/i18n/<idioma>.json`: la clave es el texto en español (con los espacios normalizados) y el valor, su traducción.
+Hoy existe `en.json` (inglés de EE. UU.). El diccionario se descarga solo al elegir el idioma; la elección se
+recuerda en el navegador y también se puede abrir el sitio con `?lang=en`.
+
+- Al agregar o cambiar un texto en `src/index.html`, agregar su traducción en `src/i18n/en.json`. Si falta, el texto
+  se muestra en español, el build lo avisa y `npm test` falla.
+- No se traducen el texto de la licencia (`<article data-lic-texto>`, es el que se firma; en inglés se muestra un
+  aviso de que el texto vinculante está en español) ni los elementos con `translate="no"`.
+- Las opciones del formulario se envían siempre en español y los correos, PDF firmados y el panel `/admin` siguen en
+  español.
+- Para otro idioma: crear `src/i18n/<código>.json` y sumarlo a `DICCIONARIOS` y `NOMBRES` en el script del selector
+  y al menú `#idioma-menu` de `src/index.html`.
+
 ## Build y pruebas locales
 
 Requiere Node 22.
