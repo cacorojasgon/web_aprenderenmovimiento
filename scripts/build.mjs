@@ -8,6 +8,7 @@
 //   JPEG sin reducir se copia byte a byte. Nunca se recomprime con pérdida algo que no cambió de tamaño.
 // - Mueve los <script> inline a archivos externos (la CSP queda en script-src 'self', sin hashes).
 // - Publica los diccionarios de src/i18n/ con huella y avisa de textos sin traducir.
+// - Inserta los datos estructurados (JSON-LD) y genera robots.txt y sitemap.xml (scripts/seo.mjs).
 // - Genera el set de favicon desde src/favicon.svg.
 // - Falla si el HTML no coincide con api/_lib/catalogo.js o si quedan manejadores inline.
 import { readFile, writeFile, mkdir, rm, copyFile, readdir } from 'node:fs/promises';
@@ -17,6 +18,7 @@ import sharp from 'sharp';
 import { pathToFileURL } from 'node:url';
 import { RECURSOS, MOTIVOS, PAISES, VERSION_VIGENTE } from '../api/_lib/catalogo.js';
 import { leerDiccionarios, revisarDiccionario } from './i18n.mjs';
+import { jsonLd, scriptJsonLd, robots, sitemap } from './seo.mjs';
 
 const RAIZ = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(RAIZ, 'src');
@@ -287,6 +289,8 @@ if (errores.length) {
 }
 let { html, reporte, ocurrencias, unicos } = await extraerRecursos(sinDescargables);
 html = await publicarIdiomas(html, fuente);
+if (!html.includes('<!-- seo:jsonld -->')) errores.push('Falta la marca <!-- seo:jsonld --> en el <head> de src/index.html');
+html = html.replace('<!-- seo:jsonld -->', () => scriptJsonLd(jsonLd(fuente)));
 if (errores.length) {
   console.error('Build detenido:\n- ' + errores.join('\n- '));
   process.exit(1);
@@ -294,7 +298,8 @@ if (errores.length) {
 html = await externalizarScripts(html);
 if (/(src|href)="data:/.test(html)) throw new Error('Quedó un recurso embebido sin extraer');
 await escribir('index.html', Buffer.from(html));
-await escribir('robots.txt', Buffer.from('User-agent: *\nDisallow: /api/\n'));
+await escribir('robots.txt', Buffer.from(robots()));
+await escribir('sitemap.xml', Buffer.from(sitemap()));
 await favicons();
 await copiarAdmin();
 

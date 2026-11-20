@@ -19,7 +19,7 @@ try {
 }
 const PUERTO = +(process.env.PORT || 5180);
 const cfg = JSON.parse(await readFile(path.join(RAIZ, 'vercel.json'), 'utf8'));
-const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain', '.xml': 'application/xml', '.json': 'application/json', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
 
 const reglas = cfg.headers.map((h) => ({ re: new RegExp('^' + h.source.replace('/:path*', '(?:/.*)?') + '$'), headers: h.headers }));
 function headersPara(ruta) {
