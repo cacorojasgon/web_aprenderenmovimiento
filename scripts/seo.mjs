@@ -44,8 +44,9 @@ export function publicaciones(html) {
 
 export function equipo(html) {
   const seccion = (html.match(/<section id="equipo"[\s\S]*?<\/section>/) || [''])[0];
-  return [...seccion.matchAll(/<h3\b[^>]*>(Dra?\.\s[^<]+)<\/h3>\s*<p\b[^>]*>([\s\S]*?)<\/p>/g)]
-    .map(([, nombre, desc]) => ({ nombre: limpiar(nombre), descripcion: limpiar(desc) }));
+  const re = /<h3\b[^>]*>(Dra?\.\s[^<]+)<\/h3>\s*<p\b[^>]*>([\s\S]*?)<\/p>(?:\s*<p\b[^>]*>\s*<a\b[^>]*href="https:\/\/orcid\.org\/(\d{4}-\d{4}-\d{4}-\d{3}[\dX])")?/g;
+  return [...seccion.matchAll(re)]
+    .map(([, nombre, desc, orcid]) => ({ nombre: limpiar(nombre), descripcion: limpiar(desc), orcid: orcid || null }));
 }
 
 export function preguntas(html) {
@@ -79,6 +80,7 @@ export function jsonLd(html) {
     honorificPrefix: p.nombre.split(' ')[0],
     description: p.descripcion,
     affiliation: { '@id': UNAB['@id'] },
+    ...(p.orcid ? { identifier: { '@type': 'PropertyValue', propertyID: 'ORCID', value: p.orcid }, sameAs: [`https://orcid.org/${p.orcid}`] } : {}),
     worksFor: { '@id': programa['@id'] },
   }));
   const articulos = publicaciones(html).map((a) => ({
