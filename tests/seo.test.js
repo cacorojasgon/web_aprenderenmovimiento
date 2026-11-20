@@ -25,6 +25,9 @@ test('seo: los datos estructurados salen de la página (publicaciones, equipo y 
   assert.ok(pubs.length >= 3);
   for (const p of pubs) assert.match(p.doi, /^10\.\d{4,}\/\S+$/);
   assert.equal(equipo(html).length, 2);
+  for (const p of equipo(html)) assert.match(p.orcid || '', /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/, `${p.nombre} sin ORCID`);
+  const personas = jsonLd(html)['@graph'].filter((n) => n['@type'] === 'Person');
+  for (const p of personas) assert.match(p.sameAs[0], /^https:\/\/orcid\.org\//);
   assert.ok(preguntas(html).length >= 10);
   const datos = jsonLd(html);
   const tipos = datos['@graph'].map((n) => n['@type']);
